@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Inquiry {
+  id           String   @id @default(uuid())
+  name         String
+  email        String
+  phone        String
+  businessName String
+  businessType String
+  notes        String?
+  status       String   @default("New") // "New" | "Contacted" | "Converted" | "Archived"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Brand {
+  id             String   @id
+  name           String
+  type           String
+  accent         String
+  icon           String   // e.g. "utensils" | "coffee" | "store" | "sparkles"
+  passphrase     String   @default("venuepass")
+  
+  // Custom metrics starting values
+  spend          Int      @default(15000)
+  impressions    Int      @default(180000)
+  ctr            Float    @default(4.5)
+  roas           Float    @default(6.0)
+  sales          Int      @default(120000)
+  occupancy      String   @default("85%")
+  growth         String   @default("+15.0%")
+
+  // Custom ad mockup
+  adHeadline     String   @default("Experience Premium Hospitality")
+  adDescription  String   @default("Savor the finest culinary experiences curated by expert chefs in an exquisite setting.")
+  adImageUrl     String   @default("https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80")
+  adCta          String   @default("Reserve Table")
+
+  // WhatsApp configuration
+  waTriggers     String   @default("/reserve,/menu,/offers")
+  waReply        String   @default("Welcome to our hospitality concierge! Let us know how we can assist you today. Reply with /menu to view our items or /reserve to book a table.")
+
+  // Tables list stored as serialized JSON string
+  tablesJson     String   @default("[]")
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

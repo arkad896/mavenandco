@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { trpc } from '../utils/trpc';
+import { getApiUrl } from '../utils/apiConfig';
 
 export function TRPCProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -22,7 +23,7 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: 'http://localhost:5000/trpc',
+          url: `${getApiUrl()}/trpc`,
         }),
       ],
     })

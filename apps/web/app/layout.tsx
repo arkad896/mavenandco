@@ -21,34 +21,32 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Maven & Co. | The Complete Hospitality Operating System",
-  description: "Maven is the all-in-one hospitality operating system — Meta Ads, WhatsApp automation, enterprise POS, inventory tracking, and premium branding under one flat monthly subscription. Built for restaurants, cafes, hotels, cloud kitchens, and resorts.",
+  title: "Maven & Co. | Premier Digital Product & Systems Engineering Studio",
+  description: "Maven & Co. designs and engineers custom software suites, type-safe fullstack architectures, and high-performance automation ecosystems for ambitious modern enterprises.",
   keywords: [
-    "hospitality marketing agency",
-    "restaurant marketing India",
-    "hospitality operating system",
-    "Meta ads for restaurants",
-    "WhatsApp automation hospitality",
-    "free POS system",
-    "restaurant POS India",
-    "cloud kitchen marketing",
-    "hotel digital marketing",
-    "cafe branding agency",
-    "Maven hospitality OS",
-    "Kolkata marketing agency"
+    "digital product studio",
+    "custom software development",
+    "systems engineering team",
+    "type-safe fullstack systems",
+    "WhatsApp automation enterprise",
+    "custom CRM platforms",
+    "custom operating systems",
+    "branding and creative agency",
+    "Maven studio",
+    "Kolkata software agency"
   ],
   authors: [{ name: "Maven & Co." }],
   openGraph: {
-    title: "Maven & Co. | The Complete Hospitality Operating System",
-    description: "Marketing + Automation + Technology — all under one flat monthly subscription. Built for restaurants, cafes, hotels, cloud kitchens, and resorts.",
+    title: "Maven & Co. | Premier Digital Product & Systems Engineering Studio",
+    description: "Custom software suites, type-safe fullstack architectures, and high-performance automation ecosystems under a dedicated team model.",
     type: "website",
     locale: "en_IN",
-    siteName: "Maven Hospitality OS",
+    siteName: "Maven & Co.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Maven & Co. | Hospitality OS",
-    description: "The entire operating system for your hospitality brand. Meta Ads, WhatsApp automation, enterprise POS, and more — one subscription.",
+    title: "Maven & Co. | Digital Product Studio",
+    description: "Custom software, type-safe systems, and enterprise automations engineered by a dedicated multi-disciplinary team.",
   },
   robots: {
     index: true,
@@ -60,17 +58,10 @@ import { TRPCProvider } from "./components/TRPCProvider";
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Maven Hospitality OS",
-  "description": "All-in-one hospitality operating system providing Meta Ads management, WhatsApp automation, enterprise POS, inventory tracking, and premium branding.",
-  "operatingSystem": "All",
-  "applicationCategory": "BusinessApplication",
-  "offers": {
-    "@type": "Offer",
-    "price": "29999",
-    "priceCurrency": "INR",
-    "priceValidUntil": "2027-12-31",
-  },
+  "@type": "ProfessionalService",
+  "name": "Maven & Co.",
+  "description": "Premier digital product and systems engineering studio designing and developing custom software, fullstack architectures, and automation ecosystems.",
+  "url": "https://mavenandco.in",
   "provider": {
     "@type": "Organization",
     "name": "Maven & Co.",

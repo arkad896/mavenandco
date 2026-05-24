@@ -46,7 +46,7 @@ export default function FeatureAccordion({ onPrefillInquiry }: FeatureAccordionP
         {
           title: 'Meta Verified Opt-In Engine',
           tagline: 'GDPR-compliant contact list building with 94% open rates.',
-          description: 'Build organic communication paths. Guests opt-in seamlessly when accessing Table QR menus or using free guest Wi-Fi terminals, letting you build owned, direct databases.',
+          description: 'Build organic communication paths. Guests opt-in smoothly when accessing Table QR menus or using free guest Wi-Fi terminals, letting you build owned, direct databases.',
           specs: ['Meta Cloud API official verification checks', 'GDPR customer data encryption protocols', 'Automated double-opt-in workflows']
         },
         {

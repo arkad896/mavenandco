@@ -157,7 +157,7 @@ export default function SolutionComparison({ onPrefillInquiry }: SolutionCompari
                 <div className="w-8 h-8 rounded-full bg-maven-gold/25 flex items-center justify-center text-maven-gold">
                   <CheckCircle2 className="w-4 h-4" />
                 </div>
-                <span className="text-sm font-semibold text-maven-cream font-sans">The Maven Hospitality OS</span>
+                <span className="text-sm font-semibold text-maven-cream font-sans">Hearth by Maven & Co.</span>
               </div>
               <span className="text-[9px] font-mono tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 py-0.5 px-2 rounded">
                 INTEGRATED
@@ -202,7 +202,7 @@ export default function SolutionComparison({ onPrefillInquiry }: SolutionCompari
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-maven-cream/5 bg-maven-green-dark/60 font-mono text-[10px] tracking-wider text-maven-gold uppercase font-bold">
           <div className="md:col-span-3">Comparison Metric</div>
           <div className="md:col-span-4 text-red-400/90">Traditional software Stack</div>
-          <div className="md:col-span-5 text-maven-gold-light">Maven Hospitality OS</div>
+          <div className="md:col-span-5 text-maven-gold-light">Hearth by Maven & Co.</div>
         </div>
 
         {/* Accordion list */}

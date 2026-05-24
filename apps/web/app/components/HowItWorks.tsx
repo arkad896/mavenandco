@@ -66,7 +66,7 @@ export default function HowItWorks() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-xl text-sm sm:text-base text-maven-muted mt-6 leading-relaxed"
           >
-            From the initial online spark to automated WhatsApp campaigns that drive return visits, our full-funnel system runs seamlessly in the background.
+            From the initial online spark to automated WhatsApp campaigns that drive return visits, our full-funnel system runs smoothly in the background.
           </motion.p>
         </div>
 

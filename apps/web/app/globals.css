@@ -20,6 +20,7 @@
     color: var(--foreground);
     background: var(--background);
     font-family: var(--font-dm-sans), sans-serif;
+    overflow-x: clip;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -35,6 +36,7 @@
   html {
     scrollbar-width: thin;
     scrollbar-color: var(--maven-gold) var(--maven-green-dark);
+    overflow-x: clip;
   }
 }
 
@@ -85,5 +87,18 @@
     background: rgba(10, 33, 25, 0.7);
     backdrop-filter: blur(16px);
     border: 1px solid rgba(201, 168, 76, 0.15);
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
   }
 }

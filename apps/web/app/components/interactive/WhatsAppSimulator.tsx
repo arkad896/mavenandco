@@ -39,7 +39,7 @@ export default function WhatsAppSimulator({ onPrefillInquiry }: WhatsAppSimulato
     {
       id: 'welcome',
       sender: 'bot',
-      text: 'Welcome to Maven Concierge! How can we assist you with Siena Bistro today? ✨',
+      text: 'Welcome to Kolkata Eats! How can we assist you with Siena Bistro today? ✨',
       time: '12:00 PM',
       type: 'text'
     }
@@ -65,7 +65,7 @@ export default function WhatsAppSimulator({ onPrefillInquiry }: WhatsAppSimulato
       label: 'Show Special Menu',
       icon: Menu,
       userMessage: 'Show me your current dinner special menu',
-      botResponse: 'Here is our curated Autumn Tasting menu. The chef recommends ordering the Truffle Pasta today:',
+      botResponse: 'Here is our selected Autumn Tasting menu. The chef recommends ordering the Truffle Pasta today:',
       type: 'template_menu',
       data: { item1: 'Truffle Tagliolini', price1: '₹790', item2: 'Burrata Salad', price2: '₹690' }
     },
@@ -75,7 +75,7 @@ export default function WhatsAppSimulator({ onPrefillInquiry }: WhatsAppSimulato
       userMessage: 'I want to host a private birthday event for 25 people',
       botResponse: 'Fabulous! We cater private parties of up to 45 guests. I have compiled our package sheets for birthday inquiries:',
       type: 'template_event',
-      data: { capacity: '25 Guests', space: 'Private Courtyard', note: 'Includes curated cocktail bar' }
+      data: { capacity: '25 Guests', space: 'Private Courtyard', note: 'Includes selected cocktail bar' }
     }
   ];
 
@@ -144,7 +144,7 @@ export default function WhatsAppSimulator({ onPrefillInquiry }: WhatsAppSimulato
             <div className="bg-[#0b141a] px-4 pt-6 pb-3 border-b border-maven-cream/5 flex items-center gap-3">
               <div className="relative">
                 <div className="w-10 h-10 rounded-full bg-maven-green-light/20 flex items-center justify-center border border-maven-gold/30">
-                  <span className="text-[10px] font-mono text-maven-gold font-bold">M</span>
+                  <span className="text-[10px] font-mono text-maven-gold font-bold">K</span>
                 </div>
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute bottom-0 right-0 border-2 border-[#0b141a]" />
               </div>

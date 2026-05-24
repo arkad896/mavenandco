@@ -38,3 +38,7 @@ next-env.d.ts
 # turborepo
 .turbo
 dist
+
+# local database & diff files
+*.db
+page_diff.txt
