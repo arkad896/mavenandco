@@ -21,7 +21,7 @@ const jsonLd = {
     "price": "20999",
     "priceValidUntil": "2026-12-31",
     "availability": "https://schema.org/InStock",
-    "url": "https://mavenandco.in/marketing"
+    "url": "https://itsmaven.in/marketing"
   }
 };
 

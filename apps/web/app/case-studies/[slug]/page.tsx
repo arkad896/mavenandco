@@ -1,14 +1,50 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Clock, Sparkles, MapPin, CheckCircle2, AlertCircle, Quote, ArrowRight } from 'lucide-react';
-import { CASE_STUDIES, CaseStudy } from '../../../lib/case-studies';
+import { ArrowLeft, Sparkles, MapPin, CheckCircle2, AlertCircle, Quote, ArrowRight } from 'lucide-react';
+import { CASE_STUDIES } from '../../../lib/case-studies';
+import { Metadata } from 'next';
 
 interface PageProps {
   params: {
     slug: string;
+  };
+}
+
+export async function generateStaticParams() {
+  return CASE_STUDIES.map((study) => ({
+    slug: study.slug,
+  }));
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const study = CASE_STUDIES.find((s) => s.slug === params.slug);
+  if (!study) return {};
+
+  return {
+    title: `${study.title} | Maven & Co. Success`,
+    description: study.summary,
+    keywords: study.seoKeywords,
+    openGraph: {
+      title: `${study.title} | Maven & Co. Success`,
+      description: study.schemaDescription,
+      type: "article",
+      publishedTime: new Date(study.date).toISOString().split('T')[0],
+      url: `https://itsmaven.in/case-studies/${study.slug}`,
+      images: [
+        {
+          url: "https://itsmaven.in/logo.png",
+          width: 800,
+          height: 800,
+          alt: "Maven & Co. Logo",
+        }
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: study.title,
+      description: study.summary,
+    }
   };
 }
 
@@ -40,22 +76,17 @@ export default function CaseStudyAnalyzer({ params }: PageProps) {
       "name": "Maven & Co.",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://mavenandco.in/logo.png"
+        "url": "https://itsmaven.in/logo.png"
       }
     }
   };
 
   return (
     <div className="min-h-screen bg-[#12352A] text-[#FDFCF0] font-body relative overflow-hidden selection:bg-[#C9A84C] selection:text-[#0A2119]">
-      <head>
-        <title>{`${study.title} | Maven & Co. Success`}</title>
-        <meta name="description" content={study.summary} />
-        <meta name="keywords" content={study.seoKeywords.join(', ')} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </head>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Background grain */}
       <div className="grain" aria-hidden="true" />
@@ -146,7 +177,7 @@ export default function CaseStudyAnalyzer({ params }: PageProps) {
             <ul className="space-y-4">
               {study.beforeMaven.painPoints.map((pain, idx) => (
                 <li key={idx} className="flex gap-3 items-start text-xs sm:text-sm text-[#FDFCF0]/85">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 shrink-0 animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 shrink-0" />
                   <p>{pain}</p>
                 </li>
               ))}

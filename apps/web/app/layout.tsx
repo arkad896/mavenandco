@@ -61,11 +61,11 @@ const jsonLd = {
   "@type": "ProfessionalService",
   "name": "Maven & Co.",
   "description": "Premier digital product and systems engineering studio designing and developing custom software, fullstack architectures, and automation ecosystems.",
-  "url": "https://mavenandco.in",
+  "url": "https://itsmaven.in",
   "provider": {
     "@type": "Organization",
     "name": "Maven & Co.",
-    "url": "https://mavenandco.in",
+    "url": "https://itsmaven.in",
   },
 };
 

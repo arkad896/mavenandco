@@ -1,14 +1,51 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Clock, Calendar, Sparkles, MessageSquare, Quote, ArrowRight } from 'lucide-react';
-import { BLOG_POSTS, BlogPost, BlogSection } from '../../../lib/blog';
+import { ArrowLeft, Clock, Sparkles, Quote, ArrowRight } from 'lucide-react';
+import { BLOG_POSTS } from '../../../lib/blog';
+import { Metadata } from 'next';
 
 interface PageProps {
   params: {
     slug: string;
+  };
+}
+
+export async function generateStaticParams() {
+  return BLOG_POSTS.map((post) => ({
+    slug: post.slug,
+  }));
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const post = BLOG_POSTS.find((p) => p.slug === params.slug);
+  if (!post) return {};
+
+  return {
+    title: `${post.title} | Maven & Co. Blog`,
+    description: post.excerpt,
+    keywords: post.seoKeywords,
+    openGraph: {
+      title: `${post.title} | Maven & Co. Blog`,
+      description: post.schemaDescription,
+      type: "article",
+      publishedTime: new Date(post.date).toISOString().split('T')[0],
+      authors: [post.author.name],
+      url: `https://itsmaven.in/blog/${post.slug}`,
+      images: [
+        {
+          url: "https://itsmaven.in/logo.png",
+          width: 800,
+          height: 800,
+          alt: "Maven & Co. Logo",
+        }
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+    }
   };
 }
 
@@ -39,26 +76,21 @@ export default function BlogPostReader({ params }: PageProps) {
       "name": "Maven & Co.",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://mavenandco.in/logo.png"
+        "url": "https://itsmaven.in/logo.png"
       }
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://mavenandco.in/blog/${post.slug}`
+      "@id": `https://itsmaven.in/blog/${post.slug}`
     }
   };
 
   return (
     <div className="min-h-screen bg-[#12352A] text-[#FDFCF0] font-body relative overflow-hidden selection:bg-[#C9A84C] selection:text-[#0A2119]">
-      <head>
-        <title>{`${post.title} | Maven & Co. Blog`}</title>
-        <meta name="description" content={post.excerpt} />
-        <meta name="keywords" content={post.seoKeywords.join(', ')} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </head>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Background grain */}
       <div className="grain" aria-hidden="true" />

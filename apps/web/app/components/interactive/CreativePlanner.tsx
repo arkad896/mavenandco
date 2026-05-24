@@ -356,7 +356,7 @@ export default function CreativePlanner({ onPrefillInquiry }: CreativePlannerPro
                     <div className="w-5 h-5 rounded-full bg-maven-gold/20 border border-maven-gold/45 flex items-center justify-center font-serif text-[9px] font-bold text-maven-gold uppercase leading-none">
                       M
                     </div>
-                    <span className="text-[9px] font-mono font-bold text-maven-cream">mavenandco • Sponsored</span>
+                    <span className="text-[9px] font-mono font-bold text-maven-cream">itsmaven • Sponsored</span>
                   </div>
                   <span className="text-[8px] font-mono text-maven-muted">5km Radius Geofence</span>
                 </div>

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     title: "Meta Ads & Radius Paid Social Engine | Maven & Co.",
     description: "Saturate your physical venue radius. Maven builds dynamic micro-radius ad campaigns synced directly to your live seat inventory and POS transaction history.",
     type: "website",
-    url: "https://mavenandco.in/marketing",
+    url: "https://itsmaven.in/marketing",
   },
   twitter: {
     card: "summary_large_image",
