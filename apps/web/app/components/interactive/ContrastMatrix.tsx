@@ -86,7 +86,7 @@ export default function ContrastMatrix({ onPrefillInquiry }: ContrastMatrixProps
           <div className="w-6 h-6 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
             <X className="w-3.5 h-3.5 stroke-[3]" />
           </div>
-          <span className="text-[10px] text-maven-muted leading-tight">{cell.value}</span>
+          <span className="text-[10px] text-maven-cream/85 leading-tight">{cell.value}</span>
         </div>
       );
     } else {
@@ -95,7 +95,7 @@ export default function ContrastMatrix({ onPrefillInquiry }: ContrastMatrixProps
           <div className="w-6 h-6 rounded-full bg-maven-gold/10 border border-maven-gold/30 flex items-center justify-center text-maven-gold">
             <HelpCircle className="w-3.5 h-3.5" />
           </div>
-          <span className="text-[10px] text-maven-muted leading-tight">{cell.value}</span>
+          <span className="text-[10px] text-maven-cream/85 leading-tight">{cell.value}</span>
         </div>
       );
     }
@@ -108,10 +108,10 @@ export default function ContrastMatrix({ onPrefillInquiry }: ContrastMatrixProps
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto mb-12">
         <span className="text-xs font-mono tracking-[0.25em] text-maven-gold uppercase mb-3 block">Structural Superiority</span>
-        <h3 className="text-3xl sm:text-5xl font-serif text-maven-cream font-medium leading-tight">
+        <h2 className="text-3xl sm:text-5xl font-serif text-maven-cream font-medium leading-tight">
           Why Maven Beats The Stack
-        </h3>
-        <p className="text-xs sm:text-sm text-maven-muted mt-2">
+        </h2>
+        <p className="text-xs sm:text-sm text-maven-cream/85 mt-2">
           Traditional vendors address only isolated sectors of your business. Maven coordinates your entire digital and operational stack in one white-glove flat fee.
         </p>
       </div>
@@ -145,7 +145,7 @@ export default function ContrastMatrix({ onPrefillInquiry }: ContrastMatrixProps
                 {/* Dimension label */}
                 <td className="p-4 sm:p-5 text-left space-y-1">
                   <span className="block text-xs font-mono font-bold text-maven-cream leading-tight">{dim.name}</span>
-                  <span className="block text-[8px] font-mono text-maven-muted uppercase leading-none">{dim.scope}</span>
+                  <span className="block text-[8px] font-mono text-maven-cream/70 uppercase leading-none">{dim.scope}</span>
                 </td>
 
                 {/* Maven value */}

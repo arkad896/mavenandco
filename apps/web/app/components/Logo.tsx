@@ -9,6 +9,8 @@ interface LogoProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 
 export default function Logo({ variant = 'full', size = 'md', className = '', ...props }: LogoProps) {
   const src = '/logo.webp';
+  const srcSet = '/logo-64.webp 64w, /logo-128.webp 128w, /logo.webp 256w';
+  const sizes = '(max-width: 640px) 64px, (max-width: 1024px) 128px, 256px';
 
   // Standard sizes mapping exactly matching original layout dimensions
   const sizeClasses = {
@@ -55,6 +57,8 @@ export default function Logo({ variant = 'full', size = 'md', className = '', ..
       >
         <img
           src={src}
+          srcSet={srcSet}
+          sizes={sizes}
           alt="Maven & Co. Monogram"
           className="absolute max-w-none"
           style={{
@@ -78,6 +82,8 @@ export default function Logo({ variant = 'full', size = 'md', className = '', ..
       >
         <img
           src={src}
+          srcSet={srcSet}
+          sizes={sizes}
           alt="Maven Wordmark"
           className="absolute max-w-none"
           style={{
@@ -101,6 +107,8 @@ export default function Logo({ variant = 'full', size = 'md', className = '', ..
       >
         <img
           src={src}
+          srcSet={srcSet}
+          sizes={sizes}
           alt="Maven Compact Logo"
           className="absolute max-w-none"
           style={{
@@ -120,6 +128,8 @@ export default function Logo({ variant = 'full', size = 'md', className = '', ..
     <div className={`relative shrink-0 ${selectedSize} ${className}`} style={{ aspectRatio: '1/1' }}>
       <img
         src={src}
+        srcSet={srcSet}
+        sizes={sizes}
         alt="Maven & Co. Logo"
         className="w-full h-full object-contain"
         {...props}

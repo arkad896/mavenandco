@@ -257,7 +257,7 @@ export default function CreativePlanner({ onPrefillInquiry }: CreativePlannerPro
           <h3 className="text-2xl font-serif text-maven-cream mt-2 font-medium">
             Custom Creative & Strategy Deck
           </h3>
-          <p className="text-xs text-maven-muted mt-1 max-w-xl">
+          <p className="text-xs text-maven-cream/85 mt-1 max-w-xl">
             Simulate your industry target audience to instantly generate custom geofenced Meta ad structures, luxury visual assets, typography scales, and highly converting WhatsApp copy.
           </p>
         </div>
@@ -338,7 +338,7 @@ export default function CreativePlanner({ onPrefillInquiry }: CreativePlannerPro
           
           <div className="absolute top-4 right-6 flex items-center gap-2 border border-maven-cream/10 bg-maven-green-light/20 px-3 py-1 rounded-full pointer-events-none">
             <span className="w-1.5 h-1.5 rounded-full bg-maven-gold animate-pulse" />
-            <span className="text-[8px] font-mono tracking-widest text-maven-muted uppercase">CREATIVE ENGINE DECK</span>
+            <span className="text-[8px] font-mono text-maven-cream/70 uppercase font-bold">CREATIVE ENGINE DECK</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch flex-1">
@@ -358,7 +358,7 @@ export default function CreativePlanner({ onPrefillInquiry }: CreativePlannerPro
                     </div>
                     <span className="text-[9px] font-mono font-bold text-maven-cream">itsmaven • Sponsored</span>
                   </div>
-                  <span className="text-[8px] font-mono text-maven-muted">5km Radius Geofence</span>
+                  <span className="text-[8px] font-mono text-maven-cream/70">5km Radius Geofence</span>
                 </div>
 
                 {/* Simulated Image/Video Visual Asset Container */}
@@ -383,7 +383,7 @@ export default function CreativePlanner({ onPrefillInquiry }: CreativePlannerPro
 
                 <div className="bg-maven-green-light/10 border border-maven-cream/5 rounded-xl p-3 text-left space-y-1.5">
                   <span className="text-[8px] font-mono text-maven-gold uppercase tracking-wider font-bold block">Ad Design Visual Spec:</span>
-                  <p className="text-[10px] text-maven-muted leading-relaxed font-sans">{activeCampaign.visualIdea}</p>
+                  <p className="text-[10px] text-maven-cream/85 leading-relaxed font-sans">{activeCampaign.visualIdea}</p>
                 </div>
               </div>
             </div>
@@ -413,7 +413,7 @@ export default function CreativePlanner({ onPrefillInquiry }: CreativePlannerPro
                           style={{ backgroundColor: color }}
                         />
                         <span className="text-[9px] font-mono text-maven-cream font-medium mt-0.5">{color}</span>
-                        <span className="text-[8px] font-mono text-maven-muted/70 uppercase truncate max-w-[70px] mt-0.5">{current.colorNames[idx]}</span>
+                        <span className="text-[8px] font-mono text-maven-cream/70 uppercase truncate max-w-[70px] mt-0.5">{current.colorNames[idx]}</span>
                       </div>
                     ))}
                   </div>
@@ -469,7 +469,7 @@ export default function CreativePlanner({ onPrefillInquiry }: CreativePlannerPro
                     <span className="block text-[9px] font-mono tracking-wider uppercase text-maven-gold font-bold">
                       {idx === 0 ? 'Cognitive Anchor' : idx === 1 ? 'Value Framer' : 'Friction Reducer'}
                     </span>
-                    <p className="text-[10px] text-maven-muted font-body leading-relaxed">{trig}</p>
+                    <p className="text-[10px] text-maven-cream/85 font-body leading-relaxed">{trig}</p>
                   </div>
                 </div>
               ))}

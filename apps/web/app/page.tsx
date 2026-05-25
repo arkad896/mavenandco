@@ -15,11 +15,13 @@ import {
 } from 'lucide-react';
 import { trpc } from './utils/trpc';
 import Logo from './components/Logo';
-import CreativePlanner from './components/interactive/CreativePlanner';
-import ServiceBlocks from './components/interactive/ServiceBlocks';
-import VerticalMapper from './components/interactive/VerticalMapper';
-import ConciergeBot from './components/interactive/ConciergeBot';
-import ContrastMatrix from './components/interactive/ContrastMatrix';
+import dynamic from 'next/dynamic';
+
+const CreativePlanner = dynamic(() => import('./components/interactive/CreativePlanner'), { ssr: false });
+const ServiceBlocks = dynamic(() => import('./components/interactive/ServiceBlocks'), { ssr: false });
+const VerticalMapper = dynamic(() => import('./components/interactive/VerticalMapper'), { ssr: false });
+const ConciergeBot = dynamic(() => import('./components/interactive/ConciergeBot'), { ssr: false });
+const ContrastMatrix = dynamic(() => import('./components/interactive/ContrastMatrix'), { ssr: false });
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -311,11 +313,14 @@ export default function Home() {
           transition={{ delay: 0.5, duration: 1.5 }}
           className="relative mt-16 sm:mt-24 w-full h-[250px] sm:h-[400px] lg:h-[480px] rounded-3xl overflow-hidden shadow-2xl border border-maven-cream/10 group"
         >
-          <div 
-            className="w-full h-full bg-cover bg-center grayscale contrast-[1.1] opacity-90 sepia-[8%] group-hover:scale-[1.02] transition-transform duration-[4000ms] ease-out"
-            style={{ 
-              backgroundImage: `url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1920&auto=format&fit=crop')` 
-            }}
+          <img 
+            src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop"
+            srcSet="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=600&auto=format&fit=crop 600w, https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop 1200w, https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1920&auto=format&fit=crop 1920w"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+            alt="The Maven Promise"
+            className="w-full h-full object-cover grayscale contrast-[1.1] opacity-90 sepia-[8%] group-hover:scale-[1.02] transition-transform duration-[4000ms] ease-out"
+            fetchPriority="high"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-maven-green-dark/80 via-transparent to-transparent pointer-events-none" />
           <div className="absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-20 flex flex-col gap-1.5 text-left">
