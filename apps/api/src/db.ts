@@ -1,37 +1,17 @@
 import { PrismaClient } from './generated/client.js';
-import { PrismaLibSql } from '@prisma/adapter-libsql';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 import dotenv from 'dotenv';
-import fs from 'fs';
-import path from 'path';
 
 dotenv.config();
 
-let dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
+const connectionString = process.env.DATABASE_URL;
 
-// Workaround for SQLite on Vercel serverless environments
-if (process.env.VERCEL) {
-  const targetDbPath = '/tmp/dev.db';
-  dbUrl = `file:${targetDbPath}`;
-
-  try {
-    if (!fs.existsSync(targetDbPath)) {
-      console.log('📦 [Vercel DB Init] Copying seed dev.db to writable /tmp/dev.db...');
-      const sourceDbPath = path.join(process.cwd(), 'dev.db');
-      if (fs.existsSync(sourceDbPath)) {
-        fs.copyFileSync(sourceDbPath, targetDbPath);
-        console.log('✅ [Vercel DB Init] dev.db copied successfully.');
-      } else {
-        console.error(`❌ [Vercel DB Init] Source dev.db not found at ${sourceDbPath}`);
-      }
-    } else {
-      console.log('ℹ️ [Vercel DB Init] dev.db already exists in /tmp.');
-    }
-  } catch (error) {
-    console.error('❌ [Vercel DB Init] Failed to initialize SQLite in /tmp:', error);
-  }
+if (!connectionString) {
+  throw new Error('❌ DATABASE_URL is not defined in environment variables.');
 }
 
-const adapter = new PrismaLibSql({ url: dbUrl });
+const pool = new pg.Pool({ connectionString });
+const adapter = new PrismaPg(pool);
 
 export const prisma = new PrismaClient({ adapter });
-

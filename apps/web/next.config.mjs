@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: {},
   webpack: (config, { dev, isServer }) => {
     if (dev) {
       // Disable persistent webpack disk caching in development 
