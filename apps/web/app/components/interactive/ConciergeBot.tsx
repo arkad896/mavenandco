@@ -37,6 +37,7 @@ export default function ConciergeBot({ onPrefillInquiry }: ConciergeBotProps) {
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [currentScenario, setCurrentScenario] = useState<'idle' | 'cafe' | 'dish' | 'resort'>('idle');
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scenarios = {
     cafe: {
@@ -96,9 +97,8 @@ export default function ConciergeBot({ onPrefillInquiry }: ConciergeBotProps) {
   }, []);
 
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
         behavior: 'smooth'
       });
     }
@@ -290,7 +290,7 @@ export default function ConciergeBot({ onPrefillInquiry }: ConciergeBotProps) {
                   <span className="block text-[8px] font-mono text-emerald-400 leading-none">Online</span>
                 </div>
               </div>
-              <div className="text-[9px] font-mono text-maven-muted uppercase">Meta Bot Node</div>
+              <div className="text-[9px] font-mono text-maven-cream/80 uppercase font-bold">Meta Bot Node</div>
             </div>
 
             {/* Messages Screen Area */}
@@ -328,12 +328,12 @@ export default function ConciergeBot({ onPrefillInquiry }: ConciergeBotProps) {
                                 {msg.card.rating}
                               </span>
                             </div>
-                            <p className="text-[9px] text-maven-muted leading-relaxed font-sans">{msg.card.description}</p>
+                            <p className="text-[9px] text-maven-cream/85 leading-relaxed font-sans">{msg.card.description}</p>
                             <div className="flex justify-between items-center border-t border-maven-cream/5 pt-2 text-[8px] font-mono">
                               <span className="text-maven-gold font-bold">{msg.card.price}</span>
                               <div className="flex gap-1">
                                 {msg.card.tags.slice(0, 2).map((t, idx) => (
-                                  <span key={idx} className="bg-maven-green-light/20 border border-maven-cream/10 px-1.5 py-0.5 rounded text-maven-muted">{t}</span>
+                                  <span key={idx} className="bg-maven-green-light/20 border border-maven-cream/10 px-1.5 py-0.5 rounded text-maven-cream/90">{t}</span>
                                 ))}
                               </div>
                             </div>
@@ -342,7 +342,7 @@ export default function ConciergeBot({ onPrefillInquiry }: ConciergeBotProps) {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1 text-[8px] font-mono text-maven-muted mt-1 select-none">
+                    <div className="flex items-center gap-1 text-[8px] font-mono text-maven-cream/70 mt-1 select-none">
                       <span>{msg.timestamp}</span>
                       {msg.sender === 'user' && (
                         <CheckCheck className="w-3 h-3 text-emerald-400" />
@@ -365,11 +365,12 @@ export default function ConciergeBot({ onPrefillInquiry }: ConciergeBotProps) {
                   </motion.div>
                 )}
               </AnimatePresence>
+              <div ref={messagesEndRef} />
             </div>
 
             {/* WA Input */}
             <div className="border-t border-maven-cream/10 pt-3 mt-3 flex items-center gap-2 shrink-0 select-none">
-              <div className="flex-1 bg-maven-green-light/10 border border-maven-cream/5 px-4 py-2.5 rounded-full text-[11px] text-left text-maven-muted/70 font-mono flex justify-between items-center pointer-events-none">
+              <div className="flex-1 bg-maven-green-light/10 border border-maven-cream/5 px-4 py-2.5 rounded-full text-[11px] text-left text-maven-cream/80 font-mono flex justify-between items-center pointer-events-none">
                 <span>WhatsApp text inputs...</span>
                 <Award className="w-3.5 h-3.5 text-maven-gold/50" />
               </div>

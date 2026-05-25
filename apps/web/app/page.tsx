@@ -542,8 +542,9 @@ export default function Home() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-mono tracking-widest text-maven-gold uppercase font-bold flex">Inquiry System Vertical</label>
+                    <label htmlFor="inquiryType" className="text-[10px] font-mono tracking-widest text-maven-gold uppercase font-bold flex">Inquiry System Vertical</label>
                     <select 
+                      id="inquiryType"
                       value={form.inquiryType}
                       onChange={(e) => setForm(prev => ({ ...prev, inquiryType: e.target.value as any }))}
                       className="w-full bg-maven-green-dark border border-maven-gold/20 focus:border-maven-gold text-maven-cream px-4 py-3 rounded-xl focus:outline-none transition-all text-sm select-custom"

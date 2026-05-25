@@ -200,9 +200,9 @@ export default function ServiceBlocks({ onPrefillInquiry }: ServiceBlocksProps) 
       {/* Title */}
       <div className="text-center max-w-2xl mx-auto mb-12">
         <span className="text-xs font-mono tracking-[0.25em] text-maven-gold uppercase mb-3 block">Custom Operations Stack</span>
-        <h3 className="text-3xl sm:text-5xl font-serif text-maven-cream font-medium leading-tight">
+        <h2 className="text-3xl sm:text-5xl font-serif text-maven-cream font-medium leading-tight">
           The 8 Service Blocks in Plain Language
-        </h3>
+        </h2>
         <p className="text-xs sm:text-sm text-maven-muted mt-2">
           Maven replaces every fragmented digital vendor and standalone software with one managed service, one flat subscription, and one single partner.
         </p>
@@ -268,7 +268,7 @@ export default function ServiceBlocks({ onPrefillInquiry }: ServiceBlocksProps) 
                     <ActiveIcon className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="text-2xl font-serif font-bold text-maven-cream leading-tight">{active.title}</h4>
+                    <h3 className="text-2xl font-serif font-bold text-maven-cream leading-tight">{active.title}</h3>
                     <span className="text-[10px] font-mono text-maven-gold uppercase tracking-wider block mt-0.5">{active.shortDesc}</span>
                   </div>
                 </div>
