@@ -2,6 +2,7 @@
   "name": "@maven/api",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "main": "src/index.ts",
   "scripts": {
     "dev": "prisma generate && tsx watch src/index.ts",
