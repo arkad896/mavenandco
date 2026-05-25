@@ -1,13 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Do NOT transpile @maven/api — it contains native Node.js addons
-  // (better-sqlite3, prisma) that cannot run in Vercel's serverless runtime.
   // The web app only needs the AppRouter *type* from the API package.
-  serverExternalPackages: [
-    'better-sqlite3',
-    '@prisma/adapter-better-sqlite3',
-    '@prisma/client',
-  ],
+  experimental: {
+    serverComponentsExternalPackages: [
+      '@prisma/client',
+    ],
+  },
   webpack: (config, { dev, isServer }) => {
     if (dev) {
       // Disable persistent webpack disk caching in development 
