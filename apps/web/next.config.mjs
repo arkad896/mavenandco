@@ -1,11 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // The web app only needs the AppRouter *type* from the API package.
-  experimental: {
-    serverComponentsExternalPackages: [
-      '@prisma/client',
-    ],
-  },
   webpack: (config, { dev, isServer }) => {
     if (dev) {
       // Disable persistent webpack disk caching in development 

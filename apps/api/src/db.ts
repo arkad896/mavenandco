@@ -1,14 +1,17 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from './generated/client.js';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
 dotenv.config();
 
+let dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
+
 // Workaround for SQLite on Vercel serverless environments
 if (process.env.VERCEL) {
   const targetDbPath = '/tmp/dev.db';
-  process.env.DATABASE_URL = `file:${targetDbPath}`;
+  dbUrl = `file:${targetDbPath}`;
 
   try {
     if (!fs.existsSync(targetDbPath)) {
@@ -28,6 +31,7 @@ if (process.env.VERCEL) {
   }
 }
 
-export const prisma = new PrismaClient();
+const adapter = new PrismaLibSql({ url: dbUrl });
 
+export const prisma = new PrismaClient({ adapter });
 
