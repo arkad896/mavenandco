@@ -10,10 +10,14 @@ const nextConfig = {
     return config;
   },
   async rewrites() {
+    let apiEndpoint = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    if (apiEndpoint && !apiEndpoint.startsWith('http://') && !apiEndpoint.startsWith('https://') && !apiEndpoint.startsWith('/')) {
+      apiEndpoint = `https://${apiEndpoint}`;
+    }
     return [
       {
         source: '/api/trpc/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/trpc/:path*`,
+        destination: `${apiEndpoint}/trpc/:path*`,
       },
     ];
   },
