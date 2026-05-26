@@ -17,9 +17,10 @@ model Inquiry {
   phone        String
   businessName String
   businessType String
-  notes        String?
-  status       String   @default("New") // "New" | "Contacted" | "Converted" | "Archived"
-  createdAt    DateTime @default(now())
+  notes           String?
+  status          String   @default("New") // "New" | "Contacted" | "Converted" | "Archived"
+  onboardingToken String?  @unique
+  createdAt       DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 

@@ -41,7 +41,7 @@ const PRESET_AD_IMAGES = [
 ];
 
 const STEPS = [
-  { id: 1, name: 'Lead Intake', desc: 'Select or create client lead' },
+  { id: 1, name: 'Access Key', desc: 'Enter onboarding token' },
   { id: 2, name: 'Brand Style', desc: 'Identity, icon & accent color' },
   { id: 3, name: 'Menu Builder', desc: 'Chef specialty dishes' },
   { id: 4, name: 'Marketing Hub', desc: 'Meta Ads & WhatsApp bot' },
@@ -60,9 +60,11 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Step 1: Inquiry Selection
-  const { data: inquiries } = trpc.getInquiries.useQuery();
-  const [selectedInquiryId, setSelectedInquiryId] = useState<string>('fresh');
+  // Token Gate States
+  const [tokenInput, setTokenInput] = useState('');
+  const [activeToken, setActiveToken] = useState<string | null>(null);
+  const [verifiedToken, setVerifiedToken] = useState<string | null>(null);
+  const [tokenError, setTokenError] = useState('');
   
   // Step 2: Visual Style
   const [brandSlug, setBrandSlug] = useState('');
@@ -89,26 +91,48 @@ export default function OnboardingPage() {
   const [waTriggers, setWaTriggers] = useState('/menu,/reserve,/offers');
   const [waReply, setWaReply] = useState('Greetings from our concierge! 🥂 Table bookings are available for tonight. Reply with /menu for dishes or /reserve to claim your luxury booth.');
 
+  // verify token query
+  const verifyQuery = trpc.verifyOnboardingToken.useQuery(
+    { token: activeToken || '' },
+    {
+      enabled: !!activeToken,
+      retry: false,
+      refetchOnWindowFocus: false,
+    }
+  );
+
   // Mutation
   const onboardMutation = trpc.onboardBrand.useMutation();
 
-  // Auto-fill from selected inquiry
+  // Load token from URL query string on mount
   useEffect(() => {
-    if (selectedInquiryId !== 'fresh' && inquiries) {
-      const inquiry = inquiries.find(i => i.id === selectedInquiryId);
-      if (inquiry) {
-        setBrandName(inquiry.businessName);
-        setBrandSlug(inquiry.businessName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, ''));
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+      if (urlToken) {
+        setTokenInput(urlToken);
+        setActiveToken(urlToken);
+      }
+    }
+  }, []);
+
+  // Handle token verification reactive side effects
+  useEffect(() => {
+    if (activeToken) {
+      if (verifyQuery.isSuccess && verifyQuery.data) {
+        const details = verifyQuery.data;
+        setBrandName(details.businessName);
+        setBrandSlug(details.businessName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, ''));
         
-        // Match business types
-        if (inquiry.businessType === 'Cafe') {
+        // Auto prefill business type and visuals
+        if (details.businessType === 'Cafe') {
           setBusinessType('Boutique Coffee & Bistro');
           setBrandIcon('coffee');
           setAccentColor('#D4A373');
-          setAdHeadline(`Indulge in ${inquiry.businessName}`);
-          setAdDescription(`Savor artisan freshly roasted coffees and handcrafted flaky pastries at ${inquiry.businessName} today.`);
+          setAdHeadline(`Indulge in ${details.businessName}`);
+          setAdDescription(`Savor artisan freshly roasted coffees and handcrafted flaky pastries at ${details.businessName} today.`);
           setAdImageUrl(PRESET_AD_IMAGES[1].url);
-        } else if (inquiry.businessType === 'Cloud Kitchen') {
+        } else if (details.businessType === 'Cloud Kitchen') {
           setBusinessType('Cloud Kitchen & Delivery');
           setBrandIcon('store');
           setAccentColor('#E76F51');
@@ -121,15 +145,27 @@ export default function OnboardingPage() {
           setAccentColor('#C9A84C');
           setAdImageUrl(PRESET_AD_IMAGES[0].url);
         }
+
+        setVerifiedToken(activeToken);
+        setTokenError('');
+        setErrorMessage('');
+        setCurrentStep(2);
+      } else if (verifyQuery.isError) {
+        setTokenError(verifyQuery.error.message || 'Invalid onboarding token.');
+        setActiveToken(null);
       }
-    } else if (selectedInquiryId === 'fresh') {
-      setBrandName('');
-      setBrandSlug('');
-      setBusinessType('Fine Dining Restaurant');
-      setBrandIcon('utensils');
-      setAccentColor('#C9A84C');
     }
-  }, [selectedInquiryId, inquiries]);
+  }, [verifyQuery.isSuccess, verifyQuery.isError, verifyQuery.data, verifyQuery.error, activeToken]);
+
+  const handleVerifyClick = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tokenInput.trim()) {
+      setTokenError('Please enter an access key.');
+      return;
+    }
+    setTokenError('');
+    setActiveToken(tokenInput.trim());
+  };
 
   // Handle dish additions
   const addDish = () => {
@@ -149,6 +185,9 @@ export default function OnboardingPage() {
     setLoading(true);
     setErrorMessage('');
     try {
+      if (!verifiedToken) {
+        throw new Error('Onboarding token has not been verified.');
+      }
       if (!brandSlug || !brandName) {
         throw new Error('Please fill in Brand Name and URL Slug in Step 2.');
       }
@@ -170,7 +209,7 @@ export default function OnboardingPage() {
         adCta,
         waTriggers,
         waReply,
-        inquiryId: selectedInquiryId !== 'fresh' ? selectedInquiryId : undefined
+        onboardingToken: verifiedToken,
       };
 
       const res = await onboardMutation.mutateAsync(payload);
@@ -193,6 +232,12 @@ export default function OnboardingPage() {
 
   // Step validation before advancing
   const nextStep = () => {
+    if (currentStep === 1) {
+      if (!verifiedToken) {
+        setErrorMessage('Please enter and verify a valid onboarding access key first.');
+        return;
+      }
+    }
     if (currentStep === 2) {
       if (!brandName.trim()) {
         setErrorMessage('Please enter a Brand Name.');
@@ -216,98 +261,79 @@ export default function OnboardingPage() {
   const renderStepBody = () => {
     switch (currentStep) {
       case 1:
-        // Step 1: Lead Intake Selection
-        const openInquiries = inquiries?.filter(i => i.status !== 'Converted') || [];
+        // Step 1: Token Entrance Gate
         return (
           <motion.div
             key="step1"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            className="space-y-8"
           >
-            <div>
-              <h2 className="text-xl font-serif font-bold text-[#FDFCF0]">Connect Lead Inquiry</h2>
-              <p className="text-xs text-[#8FAF95] mt-1 leading-relaxed">
-                Connect this onboarding workspace directly with an approved client lead from the SQLite database to automatically inherit operational specifications and mark the inquiry as Converted.
+            <div className="text-center max-w-xl mx-auto space-y-3">
+              <span className="p-3.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] inline-flex mb-2 shadow-[0_0_20px_rgba(201,168,76,0.1)] animate-pulse">
+                <ShieldCheck className="w-8 h-8" />
+              </span>
+              <h2 className="text-2xl font-serif font-bold text-[#FDFCF0]">Initialize Hospitality Space</h2>
+              <p className="text-xs text-[#8FAF95] leading-relaxed">
+                Enter your unique, secure onboarding access key received from the Maven HQ onboarding team to begin your FOH/BOH provisioning pipeline and unlock your design workshop.
               </p>
             </div>
 
-            {/* Inquiries Selector Grid */}
-            <div className="space-y-3">
-              <label className="text-[10px] font-mono text-[#8FAF95] uppercase tracking-wider block">
-                Select Database Lead Reference
-              </label>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Fresh Start Card */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedInquiryId('fresh')}
-                  className={`p-5 rounded-2xl border text-left transition-all duration-300 relative flex flex-col justify-between h-40 ${
-                    selectedInquiryId === 'fresh'
-                      ? 'bg-[#12352A]/50 text-[#FDFCF0] border-[#C9A84C]'
-                      : 'bg-[#081a15]/30 text-[#FDFCF0]/60 hover:bg-[#081a15]/60 border-[#FDFCF0]/5'
-                  }`}
-                >
-                  <div className="flex justify-between items-center w-full">
-                    <span className="p-2.5 rounded-full bg-[#12352A] border border-[#C9A84C]/20 text-[#C9A84C]">
-                      <Sparkles className="w-4 h-4" />
+            <form onSubmit={handleVerifyClick} className="max-w-md mx-auto space-y-4">
+              <div className="space-y-1.5 font-mono">
+                <label htmlFor="onboarding-token" className="text-[10px] text-[#8FAF95] uppercase tracking-wider block text-center">
+                  Onboarding Access Key
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A84C]">
+                    <ShieldCheck className="w-4 h-4" />
+                  </span>
+                  <input
+                    id="onboarding-token"
+                    type="text"
+                    value={tokenInput}
+                    onChange={(e) => setTokenInput(e.target.value)}
+                    placeholder="e.g. MAVEN-ONB-XXXXXX"
+                    required
+                    disabled={verifyQuery.isFetching || !!verifiedToken}
+                    className="w-full bg-[#081a15] border border-[#FDFCF0]/10 focus:border-[#C9A84C]/50 text-xs px-12 py-4 rounded-xl text-[#FDFCF0] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]/30 transition-all font-mono tracking-wider text-center font-bold"
+                  />
+                  {verifiedToken && (
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400 bg-emerald-950/40 border border-emerald-900/50 rounded-full p-1">
+                      <Check className="w-3.5 h-3.5" />
                     </span>
-                    {selectedInquiryId === 'fresh' && (
-                      <span className="h-5 w-5 rounded-full bg-[#C9A84C] flex items-center justify-center text-[#081a15]">
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <span className="font-serif font-bold text-[14px] block text-[#FDFCF0]">Fresh Standalone Launch</span>
-                    <span className="text-[10px] text-[#8FAF95] mt-1 block">Start client onboarding from scratch with custom parameters.</span>
-                  </div>
-                </button>
-
-                {/* Database Leads */}
-                {openInquiries.map(inq => (
-                  <button
-                    key={inq.id}
-                    type="button"
-                    onClick={() => setSelectedInquiryId(inq.id)}
-                    className={`p-5 rounded-2xl border text-left transition-all duration-300 relative flex flex-col justify-between h-40 ${
-                      selectedInquiryId === inq.id
-                        ? 'bg-[#12352A]/50 text-[#FDFCF0] border-[#C9A84C]'
-                        : 'bg-[#081a15]/30 text-[#FDFCF0]/60 hover:bg-[#081a15]/60 border-[#FDFCF0]/5'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center w-full">
-                      <span className="px-2 py-0.5 rounded-full bg-[#12352A] border border-[#C9A84C]/20 text-xs font-mono text-[#C9A84C]">
-                        {inq.businessType}
-                      </span>
-                      {selectedInquiryId === inq.id ? (
-                        <span className="h-5 w-5 rounded-full bg-[#C9A84C] flex items-center justify-center text-[#081a15]">
-                          <Check className="w-3.5 h-3.5 stroke-[3]" />
-                        </span>
-                      ) : (
-                        <span className="text-[9px] font-mono text-[#8FAF95]/50">Status: {inq.status}</span>
-                      )}
-                    </div>
-                    <div>
-                      <span className="font-serif font-bold text-[14px] block text-[#FDFCF0] truncate">
-                        {inq.businessName}
-                      </span>
-                      <span className="text-[10px] text-[#8FAF95] mt-1 block truncate">
-                        Requested by: {inq.name} ({inq.email})
-                      </span>
-                    </div>
-                  </button>
-                ))}
+                  )}
+                </div>
               </div>
 
-              {openInquiries.length === 0 && selectedInquiryId === 'fresh' && (
-                <p className="text-[10px] font-mono text-[#8FAF95]/50 text-center py-4 bg-[#081a15]/20 border border-[#FDFCF0]/5 rounded-xl">
-                  Note: No active un-onboarded inquiries found in SQLite database. Creating fresh brand instance.
-                </p>
+              {tokenError && (
+                <div className="text-red-400 text-[10px] font-mono text-center bg-red-950/20 border border-red-900/30 py-2 rounded-xl">
+                  {tokenError}
+                </div>
               )}
-            </div>
+
+              {verifiedToken && (
+                <div className="text-emerald-400 text-[10px] font-mono text-center bg-emerald-950/20 border border-emerald-900/30 py-2 rounded-xl animate-bounce">
+                  ✓ Token Verified! Loading workspace...
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={verifyQuery.isFetching || !!verifiedToken}
+                className="w-full bg-[#C9A84C] hover:bg-[#FDFCF0] text-[#081a15] font-mono font-bold tracking-widest text-xs uppercase py-4 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 hover:scale-[1.01] disabled:opacity-50"
+              >
+                {verifyQuery.isFetching ? (
+                  <span className="h-4 w-4 border-2 border-[#081a15] border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span>Verify & Unlock Space</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
           </motion.div>
         );
 
@@ -342,9 +368,7 @@ export default function OnboardingPage() {
                     value={brandName}
                     onChange={(e) => {
                       setBrandName(e.target.value);
-                      if (selectedInquiryId === 'fresh') {
-                        setBrandSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, ''));
-                      }
+                      setBrandSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, ''));
                     }}
                     placeholder="e.g. L'Aura Bistro"
                     required

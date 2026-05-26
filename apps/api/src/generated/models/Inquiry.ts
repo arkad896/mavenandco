@@ -33,6 +33,7 @@ export type InquiryMinAggregateOutputType = {
   businessType: string | null
   notes: string | null
   status: string | null
+  onboardingToken: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,6 +47,7 @@ export type InquiryMaxAggregateOutputType = {
   businessType: string | null
   notes: string | null
   status: string | null
+  onboardingToken: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,6 +61,7 @@ export type InquiryCountAggregateOutputType = {
   businessType: number
   notes: number
   status: number
+  onboardingToken: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -74,6 +77,7 @@ export type InquiryMinAggregateInputType = {
   businessType?: true
   notes?: true
   status?: true
+  onboardingToken?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -87,6 +91,7 @@ export type InquiryMaxAggregateInputType = {
   businessType?: true
   notes?: true
   status?: true
+  onboardingToken?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +105,7 @@ export type InquiryCountAggregateInputType = {
   businessType?: true
   notes?: true
   status?: true
+  onboardingToken?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -186,6 +192,7 @@ export type InquiryGroupByOutputType = {
   businessType: string
   notes: string | null
   status: string
+  onboardingToken: string | null
   createdAt: Date
   updatedAt: Date
   _count: InquiryCountAggregateOutputType | null
@@ -220,6 +227,7 @@ export type InquiryWhereInput = {
   businessType?: Prisma.StringFilter<"Inquiry"> | string
   notes?: Prisma.StringNullableFilter<"Inquiry"> | string | null
   status?: Prisma.StringFilter<"Inquiry"> | string
+  onboardingToken?: Prisma.StringNullableFilter<"Inquiry"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Inquiry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Inquiry"> | Date | string
 }
@@ -233,12 +241,14 @@ export type InquiryOrderByWithRelationInput = {
   businessType?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  onboardingToken?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type InquiryWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  onboardingToken?: string
   AND?: Prisma.InquiryWhereInput | Prisma.InquiryWhereInput[]
   OR?: Prisma.InquiryWhereInput[]
   NOT?: Prisma.InquiryWhereInput | Prisma.InquiryWhereInput[]
@@ -251,7 +261,7 @@ export type InquiryWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"Inquiry"> | string
   createdAt?: Prisma.DateTimeFilter<"Inquiry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Inquiry"> | Date | string
-}, "id">
+}, "id" | "onboardingToken">
 
 export type InquiryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -262,6 +272,7 @@ export type InquiryOrderByWithAggregationInput = {
   businessType?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  onboardingToken?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.InquiryCountOrderByAggregateInput
@@ -281,6 +292,7 @@ export type InquiryScalarWhereWithAggregatesInput = {
   businessType?: Prisma.StringWithAggregatesFilter<"Inquiry"> | string
   notes?: Prisma.StringNullableWithAggregatesFilter<"Inquiry"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"Inquiry"> | string
+  onboardingToken?: Prisma.StringNullableWithAggregatesFilter<"Inquiry"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Inquiry"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Inquiry"> | Date | string
 }
@@ -294,6 +306,7 @@ export type InquiryCreateInput = {
   businessType: string
   notes?: string | null
   status?: string
+  onboardingToken?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -307,6 +320,7 @@ export type InquiryUncheckedCreateInput = {
   businessType: string
   notes?: string | null
   status?: string
+  onboardingToken?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -320,6 +334,7 @@ export type InquiryUpdateInput = {
   businessType?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  onboardingToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -333,6 +348,7 @@ export type InquiryUncheckedUpdateInput = {
   businessType?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  onboardingToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -346,6 +362,7 @@ export type InquiryCreateManyInput = {
   businessType: string
   notes?: string | null
   status?: string
+  onboardingToken?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -359,6 +376,7 @@ export type InquiryUpdateManyMutationInput = {
   businessType?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  onboardingToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -372,6 +390,7 @@ export type InquiryUncheckedUpdateManyInput = {
   businessType?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  onboardingToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -385,6 +404,7 @@ export type InquiryCountOrderByAggregateInput = {
   businessType?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  onboardingToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -398,6 +418,7 @@ export type InquiryMaxOrderByAggregateInput = {
   businessType?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  onboardingToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -411,6 +432,7 @@ export type InquiryMinOrderByAggregateInput = {
   businessType?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  onboardingToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -438,6 +460,7 @@ export type InquirySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   businessType?: boolean
   notes?: boolean
   status?: boolean
+  onboardingToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["inquiry"]>
@@ -451,6 +474,7 @@ export type InquirySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   businessType?: boolean
   notes?: boolean
   status?: boolean
+  onboardingToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["inquiry"]>
@@ -464,6 +488,7 @@ export type InquirySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   businessType?: boolean
   notes?: boolean
   status?: boolean
+  onboardingToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["inquiry"]>
@@ -477,11 +502,12 @@ export type InquirySelectScalar = {
   businessType?: boolean
   notes?: boolean
   status?: boolean
+  onboardingToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type InquiryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phone" | "businessName" | "businessType" | "notes" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["inquiry"]>
+export type InquiryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phone" | "businessName" | "businessType" | "notes" | "status" | "onboardingToken" | "createdAt" | "updatedAt", ExtArgs["result"]["inquiry"]>
 
 export type $InquiryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Inquiry"
@@ -495,6 +521,7 @@ export type $InquiryPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     businessType: string
     notes: string | null
     status: string
+    onboardingToken: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["inquiry"]>
@@ -928,6 +955,7 @@ export interface InquiryFieldRefs {
   readonly businessType: Prisma.FieldRef<"Inquiry", 'String'>
   readonly notes: Prisma.FieldRef<"Inquiry", 'String'>
   readonly status: Prisma.FieldRef<"Inquiry", 'String'>
+  readonly onboardingToken: Prisma.FieldRef<"Inquiry", 'String'>
   readonly createdAt: Prisma.FieldRef<"Inquiry", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Inquiry", 'DateTime'>
 }

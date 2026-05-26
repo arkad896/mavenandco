@@ -91,6 +91,16 @@ export default function AdminDashboard() {
     }
   });
 
+  const generateTokenMutation = trpc.generateOnboardingToken.useMutation({
+    onSuccess: () => {
+      inquiriesQuery.refetch();
+    }
+  });
+
+  const handleGenerateToken = (inquiryId: string) => {
+    generateTokenMutation.mutate({ inquiryId });
+  };
+
   const posMutation = trpc.simulatePOSOrder.useMutation();
   const waMutation = trpc.simulateWhatsAppMessage.useMutation();
   const adMutation = trpc.simulateAdImpression.useMutation();
@@ -760,6 +770,7 @@ export default function AdminDashboard() {
                       <th className="p-4 font-bold">Contact Name</th>
                       <th className="p-4 font-bold">Business Entity</th>
                       <th className="p-4 font-bold">Inquiry Details</th>
+                      <th className="p-4 font-bold">Onboarding Access Key</th>
                       <th className="p-4 font-bold">Submit Time</th>
                       <th className="p-4 font-bold text-center">Lifecycle Status</th>
                     </tr>
@@ -786,6 +797,34 @@ export default function AdminDashboard() {
                           <span className="text-[10px] text-[#8FAF95]/70 font-mono flex items-center gap-1.5 mt-1.5">
                             <Phone className="w-3 h-3 text-[#C9A84C]/60" /> {inquiry.phone}
                           </span>
+                        </td>
+                        <td className="p-4">
+                          {inquiry.onboardingToken ? (
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-[#C9A84C] font-bold text-xs bg-[#C9A84C]/10 border border-[#C9A84C]/25 px-2.5 py-1.5 rounded-lg select-all">
+                                {inquiry.onboardingToken}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(inquiry.onboardingToken || '');
+                                  alert('Token copied to clipboard!');
+                                }}
+                                className="text-[9px] font-mono uppercase bg-[#12352A] hover:bg-[#12352A]/80 border border-[#C9A84C]/20 px-2 py-1 rounded text-[#FDFCF0] font-bold transition-colors"
+                              >
+                                Copy
+                              </button>
+                            </div>
+                          ) : inquiry.status === 'Converted' ? (
+                            <span className="text-[10px] font-mono text-[#8FAF95]/50">Converted (Active Venue)</span>
+                          ) : (
+                            <button
+                              onClick={() => handleGenerateToken(inquiry.id)}
+                              className="text-[10px] font-mono uppercase bg-[#C9A84C] hover:bg-[#FDFCF0] text-[#081a15] font-bold px-3 py-1.5 rounded-lg shadow-md transition-all flex items-center gap-1.5"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              Generate Key
+                            </button>
+                          )}
                         </td>
                         <td className="p-4 text-[#8FAF95]/70 text-[10px]">
                           <span className="flex items-center gap-1.5">

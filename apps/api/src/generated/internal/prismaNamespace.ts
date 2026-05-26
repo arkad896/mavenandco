@@ -601,6 +601,7 @@ export const InquiryScalarFieldEnum = {
   businessType: 'businessType',
   notes: 'notes',
   status: 'status',
+  onboardingToken: 'onboardingToken',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

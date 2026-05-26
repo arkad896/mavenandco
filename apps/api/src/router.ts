@@ -328,6 +328,41 @@ export const appRouter = router({
       return brand;
     }),
 
+  generateOnboardingToken: publicProcedure
+    .input(z.object({ inquiryId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      console.log('🔑 [API] Generating Onboarding Token for Inquiry:', input.inquiryId);
+      const token = `MAVEN-ONB-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      await ctx.prisma.inquiry.update({
+        where: { id: input.inquiryId },
+        data: { onboardingToken: token },
+      });
+      return { success: true, token };
+    }),
+
+  verifyOnboardingToken: publicProcedure
+    .input(z.object({ token: z.string() }))
+    .query(async ({ input, ctx }) => {
+      console.log('🔍 [API] Verifying Onboarding Token:', input.token);
+      const inquiry = await ctx.prisma.inquiry.findUnique({
+        where: { onboardingToken: input.token },
+      });
+      if (!inquiry) {
+        throw new Error('Invalid onboarding token.');
+      }
+      if (inquiry.status === 'Converted') {
+        throw new Error('This onboarding space has already been converted and activated.');
+      }
+      return {
+        success: true,
+        inquiryId: inquiry.id,
+        businessName: inquiry.businessName,
+        businessType: inquiry.businessType,
+        contactName: inquiry.name,
+        email: inquiry.email,
+      };
+    }),
+
   onboardBrand: publicProcedure
     .input(
       z.object({
@@ -350,11 +385,22 @@ export const appRouter = router({
         adCta: z.string().default('Claim Offer'),
         waTriggers: z.string().min(1),
         waReply: z.string().min(1),
-        inquiryId: z.string().optional(),
+        onboardingToken: z.string().min(1, 'Onboarding token is required'),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      console.log('🚀 [API] Onboarding New Hospitality Brand:', input.name);
+      console.log('🚀 [API] Onboarding New Hospitality Brand with Token:', input.name, input.onboardingToken);
+
+      // Verify onboarding token
+      const inquiry = await ctx.prisma.inquiry.findUnique({
+        where: { onboardingToken: input.onboardingToken }
+      });
+      if (!inquiry) {
+        throw new Error('Invalid onboarding token.');
+      }
+      if (inquiry.status === 'Converted') {
+        throw new Error('This onboarding space has already been converted and activated.');
+      }
 
       const dishNames = input.dishes.map(d => d.name);
       const fallbackDishes = dishNames.length > 0 ? dishNames : ['Chef Gourmet Special', 'House Specialty Drink'];
@@ -393,13 +439,15 @@ export const appRouter = router({
         },
       });
 
-      if (input.inquiryId) {
-        await ctx.prisma.inquiry.update({
-          where: { id: input.inquiryId },
-          data: { status: 'Converted' },
-        });
-        console.log(`✅ [API] Linked Inquiry ${input.inquiryId} converted to active brand.`);
-      }
+      // Update the inquiry status and consume the token
+      await ctx.prisma.inquiry.update({
+        where: { id: inquiry.id },
+        data: { 
+          status: 'Converted',
+          onboardingToken: null // Consume/Clear token
+        },
+      });
+      console.log(`✅ [API] Inquiry ${inquiry.id} converted and token consumed.`);
 
       eventEmitter.emit('live-event', {
         type: 'SYSTEM',
