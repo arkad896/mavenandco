@@ -136,7 +136,7 @@ export default function Home() {
           className="max-w-7xl mx-auto px-6 sm:px-8 flex justify-between items-center gap-4 lg:gap-8"
         >
           {/* Corporate Logo */}
-          <Link href="#" className="flex items-center gap-3 group focus:outline-none whitespace-nowrap shrink-0">
+          <Link href="#" aria-label="Maven Home" className="flex items-center gap-3 group focus:outline-none whitespace-nowrap shrink-0">
             <Logo variant="monogram" size="sm" className="transform group-hover:scale-105 transition-transform duration-500" />
             <span className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-maven-cream group-hover:text-maven-gold transition-colors duration-500 leading-none whitespace-nowrap">
               MAVEN
@@ -314,8 +314,8 @@ export default function Home() {
           className="relative mt-16 sm:mt-24 w-full h-[250px] sm:h-[400px] lg:h-[480px] rounded-3xl overflow-hidden shadow-2xl border border-maven-cream/10 group"
         >
           <img 
-            src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop"
-            srcSet="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=600&auto=format&fit=crop 600w, https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop 1200w, https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1920&auto=format&fit=crop 1920w"
+            src="/promise-hero.webp"
+            srcSet="/promise-hero-600.webp 600w, /promise-hero-1200.webp 1200w, /promise-hero.webp 1920w"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
             alt="The Maven Promise"
             className="w-full h-full object-cover grayscale contrast-[1.1] opacity-90 sepia-[8%] group-hover:scale-[1.02] transition-transform duration-[4000ms] ease-out"
@@ -356,9 +356,9 @@ export default function Home() {
               <Sparkles className="w-3.5 h-3.5 animate-pulse" />
               Flagship Managed Vertical OS
             </span>
-            <h3 className="text-3xl sm:text-4xl font-serif text-maven-cream leading-tight font-medium">
+            <h2 className="text-3xl sm:text-4xl font-serif text-maven-cream leading-tight font-medium">
               Experience the standalone elegance of <span className="text-gold-gradient italic font-bold">Hearth by Maven & Co.</span>
-            </h3>
+            </h2>
             <p className="text-xs sm:text-sm text-maven-muted leading-relaxed font-body">
               Our flagship Hospitality Operating System is built entirely to liberate restaurants, cafes, cloud kitchens, and boutique hotels from margin leakage. Consolidating recipe-level inventory billing, zero-commission ordering, geofenced acquisition funnels, and natural language WhatsApp CRM into a unified flat-fee managed suite.
             </p>

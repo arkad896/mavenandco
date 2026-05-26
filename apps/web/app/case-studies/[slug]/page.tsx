@@ -107,7 +107,7 @@ export default function CaseStudyAnalyzer({ params }: PageProps) {
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span>Back to Case Studies</span>
         </Link>
-        <Link href="/" className="flex flex-col group text-center focus:outline-none">
+        <Link href="/" aria-label="Maven Home" className="flex flex-col group text-center focus:outline-none">
           <span className="text-lg sm:text-xl font-serif font-bold tracking-tight text-[#FDFCF0] group-hover:text-[#C9A84C] transition-colors duration-500">
             MAVEN
           </span>
