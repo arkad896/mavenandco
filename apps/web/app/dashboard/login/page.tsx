@@ -14,7 +14,8 @@ import {
   Sparkles,
   Eye,
   EyeOff,
-  User
+  User,
+  Check
 } from 'lucide-react';
 
 import { trpc } from '../../utils/trpc';
@@ -49,6 +50,9 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Onboarding success flag
+  const [onboardedSuccess, setOnboardedSuccess] = useState(false);
+
   // OTP-specific states
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
   const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(''));
@@ -61,6 +65,21 @@ export default function LoginPage() {
   // Sync selectedBrandId and default email once brands are fetched
   useEffect(() => {
     if (fetchedBrands && fetchedBrands.length > 0 && !selectedBrandId) {
+      // Check query string parameters first for newly onboarded sign-ups
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const isNewOnboard = urlParams.get('onboarded') === 'true';
+        const onboardedBrandId = urlParams.get('brandId');
+        if (isNewOnboard && onboardedBrandId) {
+          const exists = fetchedBrands.some(b => b.id === onboardedBrandId);
+          if (exists) {
+            setSelectedBrandId(onboardedBrandId);
+            setEmailOrId(`${onboardedBrandId}@maven.co`);
+            setOnboardedSuccess(true);
+            return;
+          }
+        }
+      }
       const defaultId = fetchedBrands[0].id;
       setSelectedBrandId(defaultId);
       setEmailOrId(`${defaultId}@maven.co`);
@@ -70,9 +89,10 @@ export default function LoginPage() {
   // Sync default passphrase and email on brand change
   useEffect(() => {
     if (selectedBrandId && !emailOrId.toLowerCase().includes('admin')) {
+      const brand = brandsList.find(b => b.id === selectedBrandId);
       setEmailOrId(`${selectedBrandId}@maven.co`);
+      setPassphrase(brand?.passphrase || 'venuepass');
     }
-    setPassphrase('venuepass');
     setError('');
   }, [selectedBrandId]);
 
@@ -373,6 +393,22 @@ export default function LoginPage() {
               </p>
             </div>
 
+            {onboardedSuccess && (
+              <div className="mb-6 bg-emerald-950/20 border border-emerald-500/30 p-3 rounded-2xl flex gap-2.5 items-start text-left animate-pulse">
+                <span className="p-1 rounded-full bg-emerald-500/10 text-emerald-400 shrink-0">
+                  <Check className="w-3.5 h-3.5" />
+                </span>
+                <div>
+                  <span className="font-mono text-[9px] uppercase font-bold text-emerald-400 tracking-wider block">
+                    Brand Provisioned Successfully!
+                  </span>
+                  <p className="text-[9px] text-[#8FAF95] leading-relaxed mt-0.5">
+                    Your hospitality workspace is live. Please log in using your email to receive and verify your Gmail OTP code.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <AnimatePresence mode="wait">
               {step === 'credentials' ? (
                 <motion.form
@@ -539,6 +575,18 @@ export default function LoginPage() {
                       </>
                     )}
                   </button>
+
+                  {/* Register New Brand Link */}
+                  <div className="text-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => router.push('/dashboard/onboarding')}
+                      className="text-[10px] font-mono text-[#8FAF95] uppercase tracking-wider hover:text-[#C9A84C] transition-colors flex items-center justify-center gap-1.5 mx-auto group"
+                    >
+                      <span>New Partner? Onboard Brand</span>
+                      <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" style={{ color: currentBrand.accent }} />
+                    </button>
+                  </div>
                 </motion.form>
               ) : (
                 <motion.div

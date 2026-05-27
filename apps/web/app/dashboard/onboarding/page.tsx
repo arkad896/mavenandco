@@ -214,13 +214,9 @@ export default function OnboardingPage() {
 
       const res = await onboardMutation.mutateAsync(payload);
       if (res.success) {
-        // Auto-login newly registered brand
-        localStorage.setItem('maven_session', JSON.stringify({
-          role: 'client',
-          brandId: brandSlug,
-          timestamp: new Date().toISOString()
-        }));
-        router.push('/dashboard/client');
+        // Redirect to unified login with success indicators so they can verify their email via OTP on first sign-in
+        localStorage.removeItem('maven_session');
+        router.push(`/dashboard/login?onboarded=true&brandId=${brandSlug}`);
       } else {
         throw new Error(res.message || 'Onboarding failed.');
       }
