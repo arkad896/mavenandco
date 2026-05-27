@@ -13,7 +13,8 @@ import {
   Shield, 
   Sparkles,
   Eye,
-  EyeOff
+  EyeOff,
+  User
 } from 'lucide-react';
 
 import { trpc } from '../../utils/trpc';
@@ -40,22 +41,28 @@ export default function LoginPage() {
   // Dynamic brand fetching
   const { data: fetchedBrands, isLoading } = trpc.getBrands.useQuery();
   const [selectedBrandId, setSelectedBrandId] = useState('');
+  const [emailOrId, setEmailOrId] = useState('');
   const [passphrase, setPassphrase] = useState('venuepass');
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const isAdminKeyDetected = passphrase === 'admin123';
+  const isAdminKeyDetected = emailOrId.toLowerCase().includes('admin') || passphrase === 'admin123';
 
-  // Sync selectedBrandId once brands are fetched
+  // Sync selectedBrandId and default email once brands are fetched
   useEffect(() => {
     if (fetchedBrands && fetchedBrands.length > 0 && !selectedBrandId) {
-      setSelectedBrandId(fetchedBrands[0].id);
+      const defaultId = fetchedBrands[0].id;
+      setSelectedBrandId(defaultId);
+      setEmailOrId(`${defaultId}@maven.co`);
     }
   }, [fetchedBrands, selectedBrandId]);
 
-  // Sync default passphrase on brand change
+  // Sync default passphrase and email on brand change
   useEffect(() => {
+    if (selectedBrandId && !emailOrId.toLowerCase().includes('admin')) {
+      setEmailOrId(`${selectedBrandId}@maven.co`);
+    }
     setPassphrase('venuepass');
     setError('');
   }, [selectedBrandId]);
@@ -80,17 +87,28 @@ export default function LoginPage() {
     setTimeout(() => {
       // 1. Administrative access bypass
       if (isAdminKeyDetected) {
-        localStorage.setItem('maven_session', JSON.stringify({
-          role: 'admin',
-          timestamp: new Date().toISOString()
-        }));
-        router.push('/dashboard/admin');
+        if (emailOrId.toLowerCase().includes('admin') && passphrase === 'admin123') {
+          localStorage.setItem('maven_session', JSON.stringify({
+            role: 'admin',
+            timestamp: new Date().toISOString()
+          }));
+          router.push('/dashboard/admin');
+        } else {
+          setError('Invalid administrator credentials.');
+          setLoading(false);
+        }
         return;
       }
 
       // 2. Regular venue partner verification
       if (!selectedBrandId) {
         setError('No brand selected.');
+        setLoading(false);
+        return;
+      }
+
+      if (!emailOrId) {
+        setError('Please enter your Email or Venue ID.');
         setLoading(false);
         return;
       }
@@ -253,6 +271,39 @@ export default function LoginPage() {
                     <p className="text-[10px] text-[#8FAF95] leading-relaxed mt-0.5">
                       {currentBrand.adDescription}
                     </p>
+                  </div>
+                </div>
+
+                {/* Email or Venue ID Input */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <label htmlFor="client-email-id" className="text-[10px] font-mono text-[#8FAF95] uppercase tracking-wider">
+                      Email or Venue ID
+                    </label>
+                    {emailOrId.toLowerCase().includes('admin') ? (
+                      <span className="text-[9px] font-mono text-[#C9A84C] flex items-center gap-1">
+                        <Shield className="w-2.5 h-2.5 animate-pulse" /> Admin Mode Active
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-mono text-[#C9A84C]/60">Hint: {currentBrand.id}@maven.co</span>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-300" style={{ color: emailOrId.toLowerCase().includes('admin') ? '#C9A84C' : 'rgba(253, 252, 240, 0.4)' }}>
+                      {emailOrId.toLowerCase().includes('admin') ? <Shield className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
+                    </span>
+                    <input
+                      id="client-email-id"
+                      type="text"
+                      value={emailOrId}
+                      onChange={(e) => setEmailOrId(e.target.value)}
+                      placeholder="e.g. manager@brand.com or fine-dining"
+                      required
+                      className="w-full bg-[#081a15] border border-[#FDFCF0]/10 focus:border-[#C9A84C]/50 text-xs font-mono px-10 py-3.5 rounded-xl text-[#FDFCF0] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]/30 transition-all"
+                      style={{
+                        borderColor: emailOrId.toLowerCase().includes('admin') ? 'rgba(201, 168, 76, 0.4)' : 'rgba(253, 252, 240, 0.1)',
+                      }}
+                    />
                   </div>
                 </div>
 
