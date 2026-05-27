@@ -33,7 +33,7 @@ type DbBrand = {
   type: string;
   accent: string;
   icon: string;
-  passphrase: string;
+  passphrase?: string;
   adDescription: string;
   email?: string;
 };
@@ -43,6 +43,8 @@ export default function LoginPage() {
   // Dynamic brand fetching
   const { data: fetchedBrands, isLoading } = trpc.getBrands.useQuery();
   const dispatchOtpMutation = trpc.dispatchOtpEmail.useMutation();
+  const verifyCredentialsMutation = trpc.verifyBrandCredentials.useMutation();
+  const submitOtpVerifyMutation = trpc.submitOtpVerification.useMutation();
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [emailOrId, setEmailOrId] = useState('');
   const [passphrase, setPassphrase] = useState('');
@@ -75,7 +77,7 @@ export default function LoginPage() {
             const b = fetchedBrands.find(x => x.id === onboardedBrandId);
             setSelectedBrandId(onboardedBrandId);
             setEmailOrId(b?.email || `${onboardedBrandId}@maven.co`);
-            setPassphrase(b?.passphrase || 'venuepass');
+            setPassphrase('venuepass');
             setOnboardedSuccess(true);
           }
         }
@@ -131,9 +133,9 @@ export default function LoginPage() {
 
     if (matched) {
       setSelectedBrandId(matched.id);
-      // Auto-prefill passphrase if empty or matches previous brand defaults to preserve high-convenience testing
-      if (!passphrase || passphrase === 'venuepass' || fetchedBrands.some(b => b.passphrase === passphrase)) {
-        setPassphrase(matched.passphrase || 'venuepass');
+      // Auto-prefill default passphrase to preserve high-convenience testing
+      if (!passphrase || passphrase === 'venuepass') {
+        setPassphrase('venuepass');
       }
       setError('');
     } else {
@@ -164,11 +166,11 @@ export default function LoginPage() {
         brandName: brandName
       });
 
-      setCorrectOtp(response.code);
+      setCorrectOtp(response.code || '');
       setOtpValues(Array(6).fill(''));
 
       // If Resend is simulated (no API key set), show the sliding notification drawer
-      if (response.simulated) {
+      if (response.simulated && response.code) {
         setNotification({ email: targetEmail, code: response.code, brandName });
         setTimeout(() => {
           setNotification(prev => prev && prev.code === response.code ? null : prev);
@@ -185,91 +187,106 @@ export default function LoginPage() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    setTimeout(() => {
-      // 1. Administrative access bypass
-      if (isAdminKeyDetected) {
-        if (passphrase === 'admin123') {
-          setLoading(false);
-          triggerOtpSend('hello@itsmaven.in', 'HQ Administration');
-        } else {
-          setError('Invalid administrator credentials.');
-          setLoading(false);
-        }
-        return;
-      }
-
-      // 2. Regular venue partner verification
-      if (!selectedBrandId) {
-        setError('No brand selected.');
+    // 1. Administrative access bypass
+    if (isAdminKeyDetected) {
+      if (passphrase === 'admin123') {
         setLoading(false);
-        return;
-      }
-
-      if (!emailOrId) {
-        setError('Please enter your Email or Venue ID.');
+        await triggerOtpSend('hello@itsmaven.in', 'HQ Administration');
+      } else {
+        setError('Invalid administrator credentials.');
         setLoading(false);
-        return;
       }
+      return;
+    }
 
-      const brandToVerify = brandsList.find(b => b.id === selectedBrandId);
-      if (!brandToVerify) {
-        setError('Selected brand could not be verified.');
+    // 2. Regular venue partner verification
+    if (!selectedBrandId) {
+      setError('No brand selected.');
+      setLoading(false);
+      return;
+    }
+
+    if (!emailOrId) {
+      setError('Please enter your Email or Venue ID.');
+      setLoading(false);
+      return;
+    }
+
+    const brandToVerify = brandsList.find(b => b.id === selectedBrandId);
+    if (!brandToVerify) {
+      setError('Selected brand could not be verified.');
+      setLoading(false);
+      return;
+    }
+
+    const registeredEmailNormalized = (brandToVerify.email || `${brandToVerify.id}@maven.co`).trim().toLowerCase();
+
+    try {
+      // Secure server-side credential verification (SEC-02 & SEC-03)
+      const verifyRes = await verifyCredentialsMutation.mutateAsync({
+        brandId: selectedBrandId,
+        emailOrId: emailOrId,
+        passphrase: passphrase
+      });
+
+      if (verifyRes.success) {
         setLoading(false);
-        return;
-      }
-
-      // Check both email match and passphrase match!
-      const enteredEmailNormalized = emailOrId.trim().toLowerCase();
-      const registeredEmailNormalized = (brandToVerify.email || `${brandToVerify.id}@maven.co`).trim().toLowerCase();
-
-      if (enteredEmailNormalized !== registeredEmailNormalized && enteredEmailNormalized !== brandToVerify.id) {
-        setError('Invalid Email or Venue ID for this brand.');
-        setLoading(false);
-        return;
-      }
-
-      if (passphrase === brandToVerify.passphrase) {
-        setLoading(false);
-        triggerOtpSend(registeredEmailNormalized, brandToVerify.name);
+        await triggerOtpSend(registeredEmailNormalized, brandToVerify.name);
         setStep('otp');
       } else {
-        setError(`Invalid passphrase for "${brandToVerify.name}".`);
+        setError((verifyRes as any).message || 'Invalid credentials.');
         setLoading(false);
       }
-    }, 800);
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during verification.');
+      setLoading(false);
+    }
   };
 
-  const handleOtpVerify = (enteredCode: string) => {
+  const handleOtpVerify = async (enteredCode: string) => {
     setLoading(true);
     setOtpError('');
 
-    setTimeout(() => {
-      if (enteredCode === correctOtp) {
-        // Authenticate successfully
+    try {
+      const brandToVerify = brandsList.find(b => b.id === selectedBrandId);
+      const emailClean = isAdminKeyDetected 
+        ? 'hello@itsmaven.in' 
+        : (brandToVerify ? (brandToVerify.email || `${brandToVerify.id}@maven.co`) : emailOrId);
+
+      // Secure server-side OTP validation and session token signature return (SEC-01, SEC-03 & SEC-05)
+      const verificationRes = await submitOtpVerifyMutation.mutateAsync({
+        email: emailClean,
+        code: enteredCode,
+        brandId: isAdminKeyDetected ? undefined : selectedBrandId,
+        isAdmin: isAdminKeyDetected,
+      });
+
+      if (verificationRes.success && verificationRes.token) {
+        localStorage.setItem('maven_session', JSON.stringify({
+          role: isAdminKeyDetected ? 'admin' : 'client',
+          brandId: isAdminKeyDetected ? undefined : selectedBrandId,
+          token: verificationRes.token,
+          timestamp: new Date().toISOString()
+        }));
+
         if (isAdminKeyDetected) {
-          localStorage.setItem('maven_session', JSON.stringify({
-            role: 'admin',
-            timestamp: new Date().toISOString()
-          }));
           router.push('/dashboard/admin');
         } else {
-          localStorage.setItem('maven_session', JSON.stringify({
-            role: 'client',
-            brandId: selectedBrandId,
-            timestamp: new Date().toISOString()
-          }));
           router.push('/dashboard/client');
         }
       } else {
         setOtpError('Incorrect verification code. Please check and try again.');
         setLoading(false);
       }
-    }, 800);
+    } catch (err: any) {
+      setOtpError(err.message || 'OTP verification failed.');
+      setLoading(false);
+    }
   };
 
   const handleOtpChange = (index: number, val: string) => {

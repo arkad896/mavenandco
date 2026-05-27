@@ -1,12 +1,65 @@
-import { initTRPC } from '@trpc/server';
+import { initTRPC, TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { Context } from './context.js';
 import { eventEmitter } from './events.js';
+import { 
+  hashPassword, 
+  comparePassword, 
+  generateSessionToken, 
+  verifySessionToken 
+} from './security.js';
+import { randomBytes, randomInt, timingSafeEqual } from 'crypto';
 
 const t = initTRPC.context<Context>().create();
 
 export const router = t.router;
 export const publicProcedure = t.procedure;
+
+// Active OTP session registry (Server-side private storage to prevent OTP leakage)
+interface ActiveOtp {
+  code: string;
+  expiresAt: number;
+}
+const activeOtps = new Map<string, ActiveOtp>();
+
+// Secure tRPC session authentication middleware
+const isAuthenticated = t.middleware(({ ctx, next }) => {
+  const authHeader = ctx.req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'Authentication session token is missing or malformed.',
+    });
+  }
+  
+  const token = authHeader.substring(7);
+  const session = verifySessionToken(token);
+  if (!session) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'Your login session is invalid or has expired. Please sign in again.',
+    });
+  }
+  
+  return next({
+    ctx: {
+      ...ctx,
+      session,
+    },
+  });
+});
+
+export const protectedProcedure = t.procedure.use(isAuthenticated);
+
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.session.role !== 'admin') {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'Administrative privileges are required to perform this operation.',
+    });
+  }
+  return next();
+});
 
 export const appRouter = router({
   getSystemStatus: publicProcedure.query(() => {
@@ -62,7 +115,7 @@ export const appRouter = router({
       };
     }),
 
-  getInquiries: publicProcedure.query(async ({ ctx }) => {
+  getInquiries: adminProcedure.query(async ({ ctx }) => {
     return ctx.prisma.inquiry.findMany({
       orderBy: {
         createdAt: 'desc',
@@ -70,7 +123,7 @@ export const appRouter = router({
     });
   }),
 
-  updateInquiryStatus: publicProcedure
+  updateInquiryStatus: adminProcedure
     .input(
       z.object({
         id: z.string(),
@@ -222,7 +275,7 @@ export const appRouter = router({
           type: 'Fine Dining Restaurant',
           accent: '#C9A84C',
           icon: 'utensils',
-          passphrase: 'venuepass',
+          passphrase: hashPassword('venuepass'),
           spend: 14500,
           impressions: 185200,
           ctr: 4.85,
@@ -252,7 +305,7 @@ export const appRouter = router({
           type: 'Boutique Coffee & Bistro',
           accent: '#D4A373',
           icon: 'coffee',
-          passphrase: 'venuepass',
+          passphrase: hashPassword('venuepass'),
           spend: 8200,
           impressions: 210400,
           ctr: 5.92,
@@ -282,7 +335,7 @@ export const appRouter = router({
           type: 'Cloud Kitchen & Delivery',
           accent: '#E76F51',
           icon: 'store',
-          passphrase: 'venuepass',
+          passphrase: hashPassword('venuepass'),
           spend: 18900,
           impressions: 340500,
           ctr: 3.74,
@@ -316,7 +369,11 @@ export const appRouter = router({
       });
     }
 
-    return brands;
+    // Strip secure passphrase hashes before returning to client browser (SEC-03)
+    return brands.map(brand => {
+      const { passphrase, ...brandWithoutPassword } = brand;
+      return brandWithoutPassword;
+    });
   }),
 
   getBrandById: publicProcedure
@@ -328,14 +385,15 @@ export const appRouter = router({
       if (!brand) {
         throw new Error(`Brand with ID "${input.id}" not found.`);
       }
-      return brand;
+      const { passphrase, ...brandWithoutPassword } = brand;
+      return brandWithoutPassword;
     }),
 
-  generateOnboardingToken: publicProcedure
+  generateOnboardingToken: adminProcedure
     .input(z.object({ inquiryId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       console.log('🔑 [API] Generating Onboarding Token for Inquiry:', input.inquiryId);
-      const token = `MAVEN-ONB-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      const token = `MAVEN-ONB-${randomBytes(12).toString('hex').toUpperCase()}`;
       await ctx.prisma.inquiry.update({
         where: { id: input.inquiryId },
         data: { onboardingToken: token },
@@ -425,7 +483,7 @@ export const appRouter = router({
           type: input.type,
           accent: input.accent,
           icon: input.icon,
-          passphrase: input.passphrase,
+          passphrase: hashPassword(input.passphrase),
           spend: 12000,
           impressions: 150000,
           ctr: 4.2,
@@ -475,7 +533,14 @@ export const appRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const code = randomInt(100000, 999999).toString();
+      
+      const emailClean = input.email.toLowerCase().trim();
+      activeOtps.set(emailClean, {
+        code,
+        expiresAt: Date.now() + 5 * 60 * 1000
+      });
+      
       console.log(`📧 [API] Dispatching secure verification PIN (${code}) to ${input.email} using Resend...`);
 
       const apiKey = process.env.RESEND_API_KEY || 're_mock_key';
@@ -524,8 +589,88 @@ export const appRouter = router({
 
       return {
         success: true,
-        code,
+        // The real OTP is never leaked to the client browser in production! (SEC-01)
+        code: isSimulated ? code : undefined,
         simulated: isSimulated
+      };
+    }),
+
+  verifyBrandCredentials: publicProcedure
+    .input(
+      z.object({
+        brandId: z.string(),
+        emailOrId: z.string(),
+        passphrase: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const brand = await ctx.prisma.brand.findUnique({
+        where: { id: input.brandId },
+      });
+      if (!brand) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Brand not found.' });
+      }
+
+      const enteredEmailNormalized = input.emailOrId.trim().toLowerCase();
+      const registeredEmailNormalized = (brand.email || `${brand.id}@maven.co`).trim().toLowerCase();
+
+      if (enteredEmailNormalized !== registeredEmailNormalized && enteredEmailNormalized !== brand.id) {
+        return { success: false, message: 'Invalid Email or Venue ID for this brand.' };
+      }
+
+      // Cryptographically compare scrypt-hash
+      const isPasswordValid = comparePassword(input.passphrase, brand.passphrase);
+      if (!isPasswordValid) {
+        return { success: false, message: `Invalid passphrase for "${brand.name}".` };
+      }
+
+      return { success: true };
+    }),
+
+  submitOtpVerification: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+        code: z.string(),
+        brandId: z.string().optional(),
+        isAdmin: z.boolean(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const emailClean = input.email.toLowerCase().trim();
+      const pending = activeOtps.get(emailClean);
+      
+      if (!pending) {
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'No active OTP verification request found.' });
+      }
+      
+      if (Date.now() > pending.expiresAt) {
+        activeOtps.delete(emailClean);
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'The verification code has expired. Please request a new PIN.' });
+      }
+      
+      const isCodeValid = timingSafeEqual(
+        Buffer.from(input.code),
+        Buffer.from(pending.code)
+      );
+      
+      if (!isCodeValid) {
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Incorrect verification PIN. Access denied.' });
+      }
+      
+      // Consume OTP
+      activeOtps.delete(emailClean);
+      
+      // Generate signed secure session token
+      const token = generateSessionToken({
+        role: input.isAdmin ? 'admin' : 'client',
+        email: emailClean,
+        brandId: input.brandId,
+      });
+      
+      return {
+        success: true,
+        token,
       };
     }),
 });

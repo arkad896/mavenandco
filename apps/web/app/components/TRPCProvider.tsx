@@ -24,6 +24,24 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
       links: [
         httpBatchLink({
           url: `${getApiUrl()}/trpc`,
+          headers() {
+            if (typeof window !== 'undefined') {
+              const sessionStr = localStorage.getItem('maven_session');
+              if (sessionStr) {
+                try {
+                  const session = JSON.parse(sessionStr);
+                  if (session.token) {
+                    return {
+                      Authorization: `Bearer ${session.token}`,
+                    };
+                  }
+                } catch (e) {
+                  // Ignore
+                }
+              }
+            }
+            return {};
+          },
         }),
       ],
     })
