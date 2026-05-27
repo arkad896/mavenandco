@@ -492,7 +492,7 @@ export const appRouter = router({
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              from: 'Maven Security <onboarding@resend.dev>',
+              from: 'Maven Security <security@itsmaven.in>',
               to: input.email,
               subject: `Verification PIN for ${input.brandName}`,
               html: `

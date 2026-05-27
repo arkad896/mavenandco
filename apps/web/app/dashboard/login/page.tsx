@@ -45,7 +45,7 @@ export default function LoginPage() {
   const dispatchOtpMutation = trpc.dispatchOtpEmail.useMutation();
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [emailOrId, setEmailOrId] = useState('');
-  const [passphrase, setPassphrase] = useState('venuepass');
+  const [passphrase, setPassphrase] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -60,12 +60,13 @@ export default function LoginPage() {
   const [otpError, setOtpError] = useState('');
   const [notification, setNotification] = useState<{ email: string; code: string; brandName: string } | null>(null);
 
-  const isAdminKeyDetected = emailOrId.toLowerCase().includes('admin') || passphrase === 'admin123';
+  const isAdminKeyDetected = emailOrId.toLowerCase().includes('admin') || 
+                             emailOrId.toLowerCase() === 'dasarkaprabha2003@gmail.com' || 
+                             passphrase === 'admin123';
 
-  // Sync selectedBrandId and default email once brands are fetched
+  // Check URL parameters for newly onboarded sign-ups on load
   useEffect(() => {
-    if (fetchedBrands && fetchedBrands.length > 0 && !selectedBrandId) {
-      // Check query string parameters first for newly onboarded sign-ups
+    if (fetchedBrands && fetchedBrands.length > 0) {
       if (typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search);
         const isNewOnboard = urlParams.get('onboarded') === 'true';
@@ -73,28 +74,74 @@ export default function LoginPage() {
         if (isNewOnboard && onboardedBrandId) {
           const exists = fetchedBrands.some(b => b.id === onboardedBrandId);
           if (exists) {
+            const b = fetchedBrands.find(x => x.id === onboardedBrandId);
             setSelectedBrandId(onboardedBrandId);
-            setEmailOrId(`${onboardedBrandId}@maven.co`);
+            setEmailOrId(b?.email || `${onboardedBrandId}@maven.co`);
+            setPassphrase(b?.passphrase || 'venuepass');
             setOnboardedSuccess(true);
-            return;
           }
         }
       }
-      const defaultId = fetchedBrands[0].id;
-      setSelectedBrandId(defaultId);
-      setEmailOrId(`${defaultId}@maven.co`);
     }
-  }, [fetchedBrands, selectedBrandId]);
+  }, [fetchedBrands]);
 
-  // Sync default passphrase and email on brand change
+  // Synchronize dynamic brand matching based on emailOrId typing
   useEffect(() => {
-    if (selectedBrandId && !emailOrId.toLowerCase().includes('admin')) {
-      const brand = brandsList.find(b => b.id === selectedBrandId);
-      setEmailOrId(`${selectedBrandId}@maven.co`);
-      setPassphrase(brand?.passphrase || 'venuepass');
+    if (!fetchedBrands || fetchedBrands.length === 0) return;
+    
+    const cleanInput = emailOrId.trim().toLowerCase();
+    if (!cleanInput) {
+      setSelectedBrandId('');
+      setError('');
+      return;
     }
-    setError('');
-  }, [selectedBrandId]);
+
+    // Try to find a matching brand in the database
+    const cleanAlphanumeric = cleanInput.replace(/[^a-z0-9]/g, '');
+    
+    // 1. First pass: exact contains check on brand ID, brand email, or brand name
+    let matched = fetchedBrands.find(b => {
+      const bId = b.id.toLowerCase();
+      const bEmail = (b.email || '').toLowerCase();
+      const bName = b.name.toLowerCase();
+      
+      const emailPrefix = bEmail.split('@')[0];
+      const nameCompact = bName.replace(/\s+/g, '').toLowerCase();
+      
+      return (bId && cleanInput.includes(bId)) || 
+             (emailPrefix && cleanInput.includes(emailPrefix)) ||
+             (nameCompact && cleanInput.includes(nameCompact)) ||
+             (cleanInput && bId.includes(cleanInput)) ||
+             (cleanInput && emailPrefix.includes(cleanInput));
+    });
+
+    // 2. Second pass: fallback to fuzzy alphanumeric search (e.g. "finedining@gmail.com" matches "fine-dining")
+    if (!matched) {
+      matched = fetchedBrands.find(b => {
+        const cleanId = b.id.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const cleanEmail = (b.email || '').toLowerCase().replace(/[^a-z0-9]/g, '').split('maven')[0];
+        const cleanName = b.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        
+        return (cleanId && cleanAlphanumeric.includes(cleanId)) || 
+               (cleanAlphanumeric && cleanId.includes(cleanAlphanumeric)) ||
+               (cleanEmail && cleanAlphanumeric.includes(cleanEmail)) ||
+               (cleanAlphanumeric && cleanEmail.includes(cleanAlphanumeric)) ||
+               (cleanName && cleanAlphanumeric.includes(cleanName)) ||
+               (cleanAlphanumeric && cleanName.includes(cleanAlphanumeric));
+      });
+    }
+
+    if (matched) {
+      setSelectedBrandId(matched.id);
+      // Auto-prefill passphrase if empty or matches previous brand defaults to preserve high-convenience testing
+      if (!passphrase || passphrase === 'venuepass' || fetchedBrands.some(b => b.passphrase === passphrase)) {
+        setPassphrase(matched.passphrase || 'venuepass');
+      }
+      setError('');
+    } else {
+      setSelectedBrandId('');
+    }
+  }, [emailOrId, fetchedBrands]);
 
   const brandsList: DbBrand[] = (fetchedBrands as DbBrand[]) || [];
 
@@ -148,9 +195,12 @@ export default function LoginPage() {
     setTimeout(() => {
       // 1. Administrative access bypass
       if (isAdminKeyDetected) {
-        if (emailOrId.toLowerCase().includes('admin') && passphrase === 'admin123') {
+        const cleanEmail = emailOrId.trim().toLowerCase();
+        const isValidAdminEmail = cleanEmail.includes('admin') || cleanEmail === 'dasarkaprabha2003@gmail.com';
+        
+        if (isValidAdminEmail && passphrase === 'admin123') {
           setLoading(false);
-          const adminEmail = emailOrId.includes('@') ? emailOrId : 'admin@maven.co';
+          const adminEmail = cleanEmail.includes('@') ? cleanEmail : 'dasarkaprabha2003@gmail.com';
           triggerOtpSend(adminEmail, 'HQ Administration');
         } else {
           setError('Invalid administrator credentials.');
@@ -421,68 +471,95 @@ export default function LoginPage() {
                   className="space-y-6"
                 >
                   <div className="space-y-6">
-                    {/* Brand Selection grid */}
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-mono text-[#8FAF95] uppercase tracking-wider block">
-                        Select Your Brand
-                      </label>
-                      <div className="grid grid-cols-3 gap-3">
-                        {isLoading ? (
-                          [1, 2, 3].map(n => (
-                            <div key={n} className="p-3.5 rounded-xl border border-[#FDFCF0]/5 bg-[#081a15]/10 animate-pulse flex flex-col items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-[#12352A] flex items-center justify-center border border-[#C9A84C]/5" />
-                              <div className="h-3 w-12 bg-[#12352A] rounded" />
-                            </div>
-                          ))
-                        ) : (
-                          brandsList.map(brand => {
-                            const Icon = iconMap[brand.icon as keyof typeof iconMap] || Utensils;
-                            const isSelected = selectedBrandId === brand.id;
-                            return (
-                              <button
-                                key={brand.id}
-                                type="button"
-                                onClick={() => setSelectedBrandId(brand.id)}
-                                className={`p-3.5 rounded-xl border text-center transition-all duration-300 flex flex-col items-center gap-2 ${
-                                  isSelected
-                                    ? 'bg-[#12352A]/50 text-[#FDFCF0]'
-                                    : 'bg-[#081a15]/30 text-[#FDFCF0]/50 hover:bg-[#081a15]/50 border-transparent'
-                                }`}
-                                style={{ borderColor: isSelected ? brand.accent : 'transparent' }}
-                              >
-                                <div 
-                                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                                  style={{ backgroundColor: isSelected ? `${brand.accent}15` : 'rgba(253,252,240,0.05)' }}
-                                >
-                                  <Icon 
-                                    className="w-4 h-4 transition-transform duration-300"
-                                    style={{ color: isSelected ? brand.accent : 'currentColor' }}
-                                  />
-                                </div>
-                                <span className="text-[9px] font-mono leading-none tracking-tight break-words max-w-full font-bold">
-                                  {brand.name.split(' ')[0]}
-                                </span>
-                              </button>
-                            );
-                          })
-                        )}
-                      </div>
-                    </div>
+                    {/* Dynamic Auto-matched Brand Profile Badge */}
+                    <AnimatePresence mode="wait">
+                      {selectedBrandId ? (
+                        <motion.div
+                          key={`matched-${selectedBrandId}`}
+                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                          className="bg-[#12352A]/40 border p-4.5 rounded-2xl flex gap-3.5 text-xs shadow-xl relative overflow-hidden transition-colors duration-500"
+                          style={{ 
+                            borderColor: `${currentBrand.accent}35`, 
+                            boxShadow: `0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px ${currentBrand.accent}15`
+                          }}
+                        >
+                          <div 
+                            className="absolute top-0 right-0 w-[120px] h-[120px] rounded-full blur-[40px] pointer-events-none transition-all duration-700" 
+                            style={{ backgroundColor: `${currentBrand.accent}18` }}
+                          />
+                          
+                          <div 
+                            className="h-9 w-9 rounded-full flex items-center justify-center shrink-0 border transition-all duration-500"
+                            style={{ 
+                              backgroundColor: `${currentBrand.accent}15`, 
+                              borderColor: `${currentBrand.accent}30`,
+                              color: currentBrand.accent
+                            }}
+                          >
+                            {React.createElement(iconMap[currentBrand.icon as keyof typeof iconMap] || Utensils, { className: 'w-4 h-4' })}
+                          </div>
 
-                    {/* Selected Venue Summary Card */}
-                    <div className="bg-[#081a15]/40 border border-[#FDFCF0]/5 p-3.5 rounded-2xl flex gap-3 text-xs">
-                      <div className="h-6 w-6 rounded-full bg-[#12352A] flex items-center justify-center shrink-0 border border-[#C9A84C]/10">
-                        <Sparkles className="w-3.5 h-3.5 text-[#C9A84C]" />
-                      </div>
-                      <div>
-                        <span className="font-serif font-bold text-[#FDFCF0] block text-[11px]">
-                          {currentBrand.name} Portal
-                        </span>
-                        <p className="text-[10px] text-[#8FAF95] leading-relaxed mt-0.5">
-                          {currentBrand.adDescription}
-                        </p>
-                      </div>
-                    </div>
+                          <div className="flex-1 min-w-0 z-10 text-left font-sans">
+                            <div className="flex justify-between items-start gap-2">
+                              <span className="font-serif font-bold text-[#FDFCF0] text-sm truncate leading-snug">
+                                {currentBrand.name}
+                              </span>
+                              <span className="text-[8px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-900/50 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 animate-pulse flex items-center gap-0.5">
+                                <span className="h-1 w-1 rounded-full bg-emerald-400" /> Match
+                              </span>
+                            </div>
+                            
+                            <span className="text-[9px] font-mono text-[#8FAF95]/85 uppercase block mt-0.5 tracking-wider font-semibold">
+                              {currentBrand.type}
+                            </span>
+                            
+                            <p className="text-[10.5px] text-[#8FAF95] leading-relaxed mt-1.5 italic font-medium">
+                              "{currentBrand.adDescription}"
+                            </p>
+                          </div>
+                        </motion.div>
+                      ) : isAdminKeyDetected ? (
+                        <motion.div
+                          key="matched-admin"
+                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                          className="bg-[#C9A84C]/5 border border-[#C9A84C]/25 p-4.5 rounded-2xl flex gap-3.5 text-xs shadow-[0_8px_30px_rgba(0,0,0,0.4),0_0_20px_rgba(201,168,76,0.1)] relative overflow-hidden"
+                        >
+                          <div className="h-9 w-9 rounded-full bg-[#12352A] flex items-center justify-center shrink-0 border border-[#C9A84C]/20 text-[#C9A84C]">
+                            <Shield className="w-4 h-4 animate-pulse" />
+                          </div>
+                          <div className="flex-1 text-left z-10 font-sans">
+                            <span className="font-serif font-bold text-[#FDFCF0] text-sm block leading-snug">
+                              System Operations Controller
+                            </span>
+                            <span className="font-mono text-[8px] uppercase font-bold text-[#C9A84C] tracking-widest block mt-0.5">
+                              HQ ADMINISTRATIVE ACCESS
+                            </span>
+                            <p className="text-[10px] text-[#8FAF95] leading-relaxed mt-1.5 font-medium">
+                              Root operations privileges enabled. Access keys and SSE command injectors active.
+                            </p>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="matched-standby"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          className="border border-dashed border-[#FDFCF0]/10 p-5.5 rounded-2xl flex flex-col items-center justify-center text-center bg-[#081a15]/20"
+                        >
+                          <Sparkles className="w-5 h-5 text-[#8FAF95]/30 mb-2 animate-pulse" />
+                          <span className="text-[10px] font-mono text-[#8FAF95]/60 uppercase tracking-widest block font-bold">Portal Secure Standby</span>
+                          <p className="text-[10px] text-[#8FAF95]/40 leading-relaxed mt-1.5 max-w-xs mx-auto">
+                            Type your registered email or brand slug below to automatically unlock your dedicated Venue Partner Control Room.
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
                     {/* Email or Venue ID Input */}
                     <div className="space-y-1.5">
@@ -494,8 +571,12 @@ export default function LoginPage() {
                           <span className="text-[9px] font-mono text-[#C9A84C] flex items-center gap-1">
                             <Shield className="w-2.5 h-2.5 animate-pulse" /> Admin Mode Active
                           </span>
+                        ) : selectedBrandId ? (
+                          <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
+                            ✓ Match Detected
+                          </span>
                         ) : (
-                          <span className="text-[9px] font-mono text-[#C9A84C]/60">Hint: {currentBrand.id}@maven.co</span>
+                          <span className="text-[9px] font-mono text-[#C9A84C]/60">Hint: Try "fine-dining"</span>
                         )}
                       </div>
                       <div className="relative">
@@ -662,7 +743,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          const targetEmail = isAdminKeyDetected ? 'admin@maven.co' : (currentBrand.email || `${currentBrand.id}@maven.co`);
+                          const targetEmail = isAdminKeyDetected ? 'dasarkaprabha2003@gmail.com' : (currentBrand.email || `${currentBrand.id}@maven.co`);
                           const name = isAdminKeyDetected ? 'HQ Administration' : currentBrand.name;
                           triggerOtpSend(targetEmail, name);
                         }}

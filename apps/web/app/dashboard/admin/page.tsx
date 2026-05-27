@@ -81,6 +81,13 @@ export default function AdminDashboard() {
   const [sseConnected, setSseConnected] = useState<boolean>(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
+  // Invitation Form States
+  const [inviteName, setInviteName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteBusiness, setInviteBusiness] = useState('');
+  const [inviteType, setInviteType] = useState<'Restaurant' | 'Cafe' | 'Hotel' | 'Cloud Kitchen' | 'Resort' | 'Other'>('Restaurant');
+  const [inviteLoading, setInviteLoading] = useState(false);
+
   // tRPC Queries & Mutations
   const statusQuery = trpc.getSystemStatus.useQuery(undefined, { refetchInterval: 10000 });
   const inquiriesQuery = trpc.getInquiries.useQuery(undefined, { enabled: isAdmin });
@@ -99,6 +106,40 @@ export default function AdminDashboard() {
 
   const handleGenerateToken = (inquiryId: string) => {
     generateTokenMutation.mutate({ inquiryId });
+  };
+
+  const submitInquiryMutation = trpc.submitInquiry.useMutation();
+
+  const handleManualInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteLoading(true);
+    try {
+      const inquiryRes = await submitInquiryMutation.mutateAsync({
+        name: inviteName,
+        email: inviteEmail,
+        phone: '9999999999', // Default phone for manual admin invites
+        businessName: inviteBusiness,
+        businessType: inviteType,
+        notes: 'Manually invited brand partner via MasterHQ cockpit console.'
+      });
+
+      if (inquiryRes && inquiryRes.success && inquiryRes.inquiryId) {
+        await generateTokenMutation.mutateAsync({
+          inquiryId: inquiryRes.inquiryId
+        });
+        
+        setInviteName('');
+        setInviteEmail('');
+        setInviteBusiness('');
+        setInviteType('Restaurant');
+        inquiriesQuery.refetch();
+        alert(`Successfully invited "${inviteBusiness}"! Onboarding token generated.`);
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to manually invite brand partner.');
+    } finally {
+      setInviteLoading(false);
+    }
   };
 
   const posMutation = trpc.simulatePOSOrder.useMutation();
@@ -751,6 +792,81 @@ export default function AdminDashboard() {
                 <RefreshCw className={`w-3.5 h-3.5 ${inquiriesQuery.isFetching ? 'animate-spin' : ''}`} />
                 Sync Leads Table
               </button>
+            </div>
+
+            {/* Quick Invitation Form */}
+            <div className="bg-[#081a15]/30 border border-[#FDFCF0]/10 p-5 rounded-2xl space-y-4">
+              <span className="font-mono text-[9px] uppercase tracking-wider text-[#C9A84C] font-bold block">
+                ✦ Invite New Partner & Generate Access Token
+              </span>
+              <form onSubmit={handleManualInvite} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end text-xs font-mono">
+                <div className="space-y-1 text-left">
+                  <label htmlFor="invite-name" className="text-[#8FAF95] block text-[10px]">Partner Name</label>
+                  <input
+                    id="invite-name"
+                    type="text"
+                    value={inviteName}
+                    onChange={(e) => setInviteName(e.target.value)}
+                    placeholder="e.g. John Doe"
+                    required
+                    className="w-full bg-[#12352A] border border-[#FDFCF0]/10 rounded-md px-3 py-2 text-[#FDFCF0] focus:outline-none focus:border-[#C9A84C]/50"
+                  />
+                </div>
+                <div className="space-y-1 text-left">
+                  <label htmlFor="invite-email" className="text-[#8FAF95] block text-[10px]">Email Address</label>
+                  <input
+                    id="invite-email"
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="e.g. partner@gmail.com"
+                    required
+                    className="w-full bg-[#12352A] border border-[#FDFCF0]/10 rounded-md px-3 py-2 text-[#FDFCF0] focus:outline-none focus:border-[#C9A84C]/50"
+                  />
+                </div>
+                <div className="space-y-1 text-left">
+                  <label htmlFor="invite-business" className="text-[#8FAF95] block text-[10px]">Business Name</label>
+                  <input
+                    id="invite-business"
+                    type="text"
+                    value={inviteBusiness}
+                    onChange={(e) => setInviteBusiness(e.target.value)}
+                    placeholder="e.g. Bistro Royal"
+                    required
+                    className="w-full bg-[#12352A] border border-[#FDFCF0]/10 rounded-md px-3 py-2 text-[#FDFCF0] focus:outline-none focus:border-[#C9A84C]/50"
+                  />
+                </div>
+                <div className="space-y-1 text-left">
+                  <label htmlFor="invite-type" className="text-[#8FAF95] block text-[10px]">Business Type</label>
+                  <select
+                    id="invite-type"
+                    value={inviteType}
+                    onChange={(e) => setInviteType(e.target.value as any)}
+                    className="w-full bg-[#12352A] border border-[#FDFCF0]/10 rounded-md px-3 py-2 text-[#FDFCF0] focus:outline-none text-[11px]"
+                  >
+                    <option value="Restaurant">Restaurant (Fine Dining)</option>
+                    <option value="Cafe">Cafe (Boutique Cafe)</option>
+                    <option value="Cloud Kitchen">Cloud Kitchen</option>
+                    <option value="Hotel">Hotel</option>
+                    <option value="Resort">Resort</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  disabled={inviteLoading}
+                  className="w-full bg-[#C9A84C] hover:bg-[#FDFCF0] text-[#0A2119] text-[9px] font-bold uppercase tracking-widest py-3.5 rounded-lg transition-all flex items-center justify-center gap-1.5"
+                >
+                  {inviteLoading ? (
+                    <span className="h-3 w-3 border-2 border-[#0A2119] border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Generate Token</span>
+                    </>
+                  )}
+                </button>
+              </form>
             </div>
 
             {inquiriesQuery.isLoading ? (
