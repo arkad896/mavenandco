@@ -466,6 +466,68 @@ export const appRouter = router({
         message: `Congratulations! "${brand.name}" has been registered. They can now log in using passphrase: "${brand.passphrase}".`,
       };
     }),
+
+  dispatchOtpEmail: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+        brandName: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log(`📧 [API] Dispatching secure verification PIN (${code}) to ${input.email} using Resend...`);
+
+      const apiKey = process.env.RESEND_API_KEY || 're_mock_key';
+      const isSimulated = !process.env.RESEND_API_KEY;
+
+      if (isSimulated) {
+        console.warn('⚠️ [API] RESEND_API_KEY is not set. Verification will fall back to simulated console logs.');
+      } else {
+        try {
+          const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              from: 'Maven Security <onboarding@resend.dev>',
+              to: input.email,
+              subject: `Verification PIN for ${input.brandName}`,
+              html: `
+                <div style="font-family: sans-serif; max-width: 500px; padding: 20px; border: 1px solid #eaeaea; border-radius: 12px; background-color: #081a15; color: #FDFCF0;">
+                  <h2 style="color: #C9A84C; margin-top: 0;">Maven Hospitality OS</h2>
+                  <p style="font-size: 14px; color: #8FAF95;">Secure Gate Verification PIN</p>
+                  <p style="font-size: 14px;">Your 6-digit OTP code is:</p>
+                  <div style="font-size: 24px; font-weight: bold; font-family: monospace; letter-spacing: 2px; color: #C9A84C; background-color: #12352A; padding: 12px; text-align: center; border-radius: 8px; border: 1px solid rgba(201, 168, 76, 0.3); margin: 20px 0;">
+                    ${code.substring(0, 3)}-${code.substring(3)}
+                  </div>
+                  <p style="font-size: 11px; color: #8FAF95; border-top: 1px solid rgba(253, 252, 240, 0.1); padding-top: 10px; margin-top: 20px;">
+                    This is an automated security transmission. If you did not request this code, please ignore this message.
+                  </p>
+                </div>
+              `
+            })
+          });
+
+          if (!response.ok) {
+            const errData = await response.json();
+            console.error('❌ [API] Resend transmission failed:', errData);
+          } else {
+            console.log(`✅ [API] Email successfully sent to ${input.email}!`);
+          }
+        } catch (error) {
+          console.error('❌ [API] Resend transmission failed:', error);
+        }
+      }
+
+      return {
+        success: true,
+        code,
+        simulated: isSimulated
+      };
+    }),
 });
 
 export type AppRouter = typeof appRouter;

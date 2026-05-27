@@ -41,6 +41,7 @@ export default function LoginPage() {
   const router = useRouter();
   // Dynamic brand fetching
   const { data: fetchedBrands, isLoading } = trpc.getBrands.useQuery();
+  const dispatchOtpMutation = trpc.dispatchOtpEmail.useMutation();
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [emailOrId, setEmailOrId] = useState('');
   const [passphrase, setPassphrase] = useState('venuepass');
@@ -87,18 +88,36 @@ export default function LoginPage() {
     adDescription: 'Savor Michelin-inspired traditional recipes recreated with fresh seasonal ingredients.'
   };
 
-  // Helper to trigger the secure Gmail relay simulation
-  const triggerOtpSend = (targetEmail: string, brandName: string) => {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setCorrectOtp(code);
-    setOtpValues(Array(6).fill(''));
+  // Dispatch the secure verification PIN via Resend API
+  const triggerOtpSend = async (targetEmail: string, brandName: string) => {
+    setLoading(true);
     setOtpError('');
-    setNotification({ email: targetEmail, code, brandName });
+    setError('');
+    try {
+      const response = await dispatchOtpMutation.mutateAsync({
+        email: targetEmail,
+        brandName: brandName
+      });
 
-    // Auto-dismiss simulated banner after 8 seconds
-    setTimeout(() => {
-      setNotification(prev => prev && prev.code === code ? null : prev);
-    }, 8000);
+      setCorrectOtp(response.code);
+      setOtpValues(Array(6).fill(''));
+
+      // If Resend is simulated (no API key set), show the sliding notification drawer
+      if (response.simulated) {
+        setNotification({ email: targetEmail, code: response.code, brandName });
+        setTimeout(() => {
+          setNotification(prev => prev && prev.code === response.code ? null : prev);
+        }, 8000);
+      } else {
+        // A real email was sent! Clear notification state so they check their actual Gmail inbox.
+        setNotification(null);
+      }
+      setStep('otp');
+    } catch (err: any) {
+      setError(err.message || 'Failed to dispatch verification PIN.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -111,8 +130,8 @@ export default function LoginPage() {
       if (isAdminKeyDetected) {
         if (emailOrId.toLowerCase().includes('admin') && passphrase === 'admin123') {
           setLoading(false);
-          triggerOtpSend('admin@maven.co', 'HQ Administration');
-          setStep('otp');
+          const adminEmail = emailOrId.includes('@') ? emailOrId : 'admin@maven.co';
+          triggerOtpSend(adminEmail, 'HQ Administration');
         } else {
           setError('Invalid administrator credentials.');
           setLoading(false);
