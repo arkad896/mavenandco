@@ -1,8 +1,10 @@
 export function getApiUrl(): string {
-  if (typeof window !== 'undefined') {
-    // Client-side: use environment variable or fallback to localhost
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  
+  // Resilient Guard: Automatically prepend protocol if it is a domain without one (prevents relative path resolution browser bug!)
+  if (url && !url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/')) {
+    url = `https://${url}`;
   }
-  // Server-side / Build-time
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  
+  return url;
 }
