@@ -60,9 +60,7 @@ export default function LoginPage() {
   const [otpError, setOtpError] = useState('');
   const [notification, setNotification] = useState<{ email: string; code: string; brandName: string } | null>(null);
 
-  const isAdminKeyDetected = emailOrId.toLowerCase().includes('admin') || 
-                             emailOrId.toLowerCase() === 'dasarkaprabha2003@gmail.com' || 
-                             passphrase === 'admin123';
+  const isAdminKeyDetected = emailOrId.toLowerCase().trim() === 'hello@itsmaven.in';
 
   // Check URL parameters for newly onboarded sign-ups on load
   useEffect(() => {
@@ -195,13 +193,9 @@ export default function LoginPage() {
     setTimeout(() => {
       // 1. Administrative access bypass
       if (isAdminKeyDetected) {
-        const cleanEmail = emailOrId.trim().toLowerCase();
-        const isValidAdminEmail = cleanEmail.includes('admin') || cleanEmail === 'dasarkaprabha2003@gmail.com';
-        
-        if (isValidAdminEmail && passphrase === 'admin123') {
+        if (passphrase === 'admin123') {
           setLoading(false);
-          const adminEmail = cleanEmail.includes('@') ? cleanEmail : 'dasarkaprabha2003@gmail.com';
-          triggerOtpSend(adminEmail, 'HQ Administration');
+          triggerOtpSend('hello@itsmaven.in', 'HQ Administration');
         } else {
           setError('Invalid administrator credentials.');
           setLoading(false);
@@ -743,7 +737,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          const targetEmail = isAdminKeyDetected ? 'dasarkaprabha2003@gmail.com' : (currentBrand.email || `${currentBrand.id}@maven.co`);
+                          const targetEmail = isAdminKeyDetected ? 'hello@itsmaven.in' : (currentBrand.email || `${currentBrand.id}@maven.co`);
                           const name = isAdminKeyDetected ? 'HQ Administration' : currentBrand.name;
                           triggerOtpSend(targetEmail, name);
                         }}
