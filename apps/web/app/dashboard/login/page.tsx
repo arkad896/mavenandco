@@ -34,6 +34,7 @@ type DbBrand = {
   icon: string;
   passphrase: string;
   adDescription: string;
+  email?: string;
 };
 
 export default function LoginPage() {
@@ -116,6 +117,16 @@ export default function LoginPage() {
       const brandToVerify = brandsList.find(b => b.id === selectedBrandId);
       if (!brandToVerify) {
         setError('Selected brand could not be verified.');
+        setLoading(false);
+        return;
+      }
+
+      // Check both email match and passphrase match!
+      const enteredEmailNormalized = emailOrId.trim().toLowerCase();
+      const registeredEmailNormalized = (brandToVerify.email || `${brandToVerify.id}@maven.co`).trim().toLowerCase();
+
+      if (enteredEmailNormalized !== registeredEmailNormalized && enteredEmailNormalized !== brandToVerify.id) {
+        setError('Invalid Email or Venue ID for this brand.');
         setLoading(false);
         return;
       }

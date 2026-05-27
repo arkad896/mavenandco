@@ -45,6 +45,7 @@ export type BrandSumAggregateOutputType = {
 export type BrandMinAggregateOutputType = {
   id: string | null
   name: string | null
+  email: string | null
   type: string | null
   accent: string | null
   icon: string | null
@@ -70,6 +71,7 @@ export type BrandMinAggregateOutputType = {
 export type BrandMaxAggregateOutputType = {
   id: string | null
   name: string | null
+  email: string | null
   type: string | null
   accent: string | null
   icon: string | null
@@ -95,6 +97,7 @@ export type BrandMaxAggregateOutputType = {
 export type BrandCountAggregateOutputType = {
   id: number
   name: number
+  email: number
   type: number
   accent: number
   icon: number
@@ -138,6 +141,7 @@ export type BrandSumAggregateInputType = {
 export type BrandMinAggregateInputType = {
   id?: true
   name?: true
+  email?: true
   type?: true
   accent?: true
   icon?: true
@@ -163,6 +167,7 @@ export type BrandMinAggregateInputType = {
 export type BrandMaxAggregateInputType = {
   id?: true
   name?: true
+  email?: true
   type?: true
   accent?: true
   icon?: true
@@ -188,6 +193,7 @@ export type BrandMaxAggregateInputType = {
 export type BrandCountAggregateInputType = {
   id?: true
   name?: true
+  email?: true
   type?: true
   accent?: true
   icon?: true
@@ -300,6 +306,7 @@ export type BrandGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type BrandGroupByOutputType = {
   id: string
   name: string
+  email: string | null
   type: string
   accent: string
   icon: string
@@ -348,6 +355,7 @@ export type BrandWhereInput = {
   NOT?: Prisma.BrandWhereInput | Prisma.BrandWhereInput[]
   id?: Prisma.StringFilter<"Brand"> | string
   name?: Prisma.StringFilter<"Brand"> | string
+  email?: Prisma.StringNullableFilter<"Brand"> | string | null
   type?: Prisma.StringFilter<"Brand"> | string
   accent?: Prisma.StringFilter<"Brand"> | string
   icon?: Prisma.StringFilter<"Brand"> | string
@@ -373,6 +381,7 @@ export type BrandWhereInput = {
 export type BrandOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
   accent?: Prisma.SortOrder
   icon?: Prisma.SortOrder
@@ -401,6 +410,7 @@ export type BrandWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.BrandWhereInput[]
   NOT?: Prisma.BrandWhereInput | Prisma.BrandWhereInput[]
   name?: Prisma.StringFilter<"Brand"> | string
+  email?: Prisma.StringNullableFilter<"Brand"> | string | null
   type?: Prisma.StringFilter<"Brand"> | string
   accent?: Prisma.StringFilter<"Brand"> | string
   icon?: Prisma.StringFilter<"Brand"> | string
@@ -426,6 +436,7 @@ export type BrandWhereUniqueInput = Prisma.AtLeast<{
 export type BrandOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
   accent?: Prisma.SortOrder
   icon?: Prisma.SortOrder
@@ -459,6 +470,7 @@ export type BrandScalarWhereWithAggregatesInput = {
   NOT?: Prisma.BrandScalarWhereWithAggregatesInput | Prisma.BrandScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Brand"> | string
   name?: Prisma.StringWithAggregatesFilter<"Brand"> | string
+  email?: Prisma.StringNullableWithAggregatesFilter<"Brand"> | string | null
   type?: Prisma.StringWithAggregatesFilter<"Brand"> | string
   accent?: Prisma.StringWithAggregatesFilter<"Brand"> | string
   icon?: Prisma.StringWithAggregatesFilter<"Brand"> | string
@@ -484,6 +496,7 @@ export type BrandScalarWhereWithAggregatesInput = {
 export type BrandCreateInput = {
   id: string
   name: string
+  email?: string | null
   type: string
   accent: string
   icon: string
@@ -509,6 +522,7 @@ export type BrandCreateInput = {
 export type BrandUncheckedCreateInput = {
   id: string
   name: string
+  email?: string | null
   type: string
   accent: string
   icon: string
@@ -534,6 +548,7 @@ export type BrandUncheckedCreateInput = {
 export type BrandUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
   accent?: Prisma.StringFieldUpdateOperationsInput | string
   icon?: Prisma.StringFieldUpdateOperationsInput | string
@@ -559,6 +574,7 @@ export type BrandUpdateInput = {
 export type BrandUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
   accent?: Prisma.StringFieldUpdateOperationsInput | string
   icon?: Prisma.StringFieldUpdateOperationsInput | string
@@ -584,6 +600,7 @@ export type BrandUncheckedUpdateInput = {
 export type BrandCreateManyInput = {
   id: string
   name: string
+  email?: string | null
   type: string
   accent: string
   icon: string
@@ -609,6 +626,7 @@ export type BrandCreateManyInput = {
 export type BrandUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
   accent?: Prisma.StringFieldUpdateOperationsInput | string
   icon?: Prisma.StringFieldUpdateOperationsInput | string
@@ -634,6 +652,7 @@ export type BrandUpdateManyMutationInput = {
 export type BrandUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
   accent?: Prisma.StringFieldUpdateOperationsInput | string
   icon?: Prisma.StringFieldUpdateOperationsInput | string
@@ -659,6 +678,7 @@ export type BrandUncheckedUpdateManyInput = {
 export type BrandCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   type?: Prisma.SortOrder
   accent?: Prisma.SortOrder
   icon?: Prisma.SortOrder
@@ -692,6 +712,7 @@ export type BrandAvgOrderByAggregateInput = {
 export type BrandMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   type?: Prisma.SortOrder
   accent?: Prisma.SortOrder
   icon?: Prisma.SortOrder
@@ -717,6 +738,7 @@ export type BrandMaxOrderByAggregateInput = {
 export type BrandMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   type?: Prisma.SortOrder
   accent?: Prisma.SortOrder
   icon?: Prisma.SortOrder
@@ -768,6 +790,7 @@ export type FloatFieldUpdateOperationsInput = {
 export type BrandSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  email?: boolean
   type?: boolean
   accent?: boolean
   icon?: boolean
@@ -793,6 +816,7 @@ export type BrandSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type BrandSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  email?: boolean
   type?: boolean
   accent?: boolean
   icon?: boolean
@@ -818,6 +842,7 @@ export type BrandSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type BrandSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  email?: boolean
   type?: boolean
   accent?: boolean
   icon?: boolean
@@ -843,6 +868,7 @@ export type BrandSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type BrandSelectScalar = {
   id?: boolean
   name?: boolean
+  email?: boolean
   type?: boolean
   accent?: boolean
   icon?: boolean
@@ -865,7 +891,7 @@ export type BrandSelectScalar = {
   updatedAt?: boolean
 }
 
-export type BrandOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "type" | "accent" | "icon" | "passphrase" | "spend" | "impressions" | "ctr" | "roas" | "sales" | "occupancy" | "growth" | "adHeadline" | "adDescription" | "adImageUrl" | "adCta" | "waTriggers" | "waReply" | "tablesJson" | "createdAt" | "updatedAt", ExtArgs["result"]["brand"]>
+export type BrandOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "type" | "accent" | "icon" | "passphrase" | "spend" | "impressions" | "ctr" | "roas" | "sales" | "occupancy" | "growth" | "adHeadline" | "adDescription" | "adImageUrl" | "adCta" | "waTriggers" | "waReply" | "tablesJson" | "createdAt" | "updatedAt", ExtArgs["result"]["brand"]>
 
 export type $BrandPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Brand"
@@ -873,6 +899,7 @@ export type $BrandPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
+    email: string | null
     type: string
     accent: string
     icon: string
@@ -1318,6 +1345,7 @@ export interface Prisma__BrandClient<T, Null = never, ExtArgs extends runtime.Ty
 export interface BrandFieldRefs {
   readonly id: Prisma.FieldRef<"Brand", 'String'>
   readonly name: Prisma.FieldRef<"Brand", 'String'>
+  readonly email: Prisma.FieldRef<"Brand", 'String'>
   readonly type: Prisma.FieldRef<"Brand", 'String'>
   readonly accent: Prisma.FieldRef<"Brand", 'String'>
   readonly icon: Prisma.FieldRef<"Brand", 'String'>

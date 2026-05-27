@@ -218,6 +218,7 @@ export const appRouter = router({
         {
           id: 'fine-dining',
           name: 'The Heritage Room',
+          email: 'fine-dining@maven.co',
           type: 'Fine Dining Restaurant',
           accent: '#C9A84C',
           icon: 'utensils',
@@ -247,6 +248,7 @@ export const appRouter = router({
         {
           id: 'cafe',
           name: 'Brew & Bound',
+          email: 'cafe@maven.co',
           type: 'Boutique Coffee & Bistro',
           accent: '#D4A373',
           icon: 'coffee',
@@ -276,6 +278,7 @@ export const appRouter = router({
         {
           id: 'cloud-kitchen',
           name: 'Bowl & Box Co.',
+          email: 'cloud-kitchen@maven.co',
           type: 'Cloud Kitchen & Delivery',
           accent: '#E76F51',
           icon: 'store',
@@ -418,6 +421,7 @@ export const appRouter = router({
         data: {
           id: input.brandId,
           name: input.name,
+          email: inquiry.email,
           type: input.type,
           accent: input.accent,
           icon: input.icon,

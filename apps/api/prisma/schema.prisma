@@ -27,6 +27,7 @@ model Inquiry {
 model Brand {
   id             String   @id
   name           String
+  email          String?
   type           String
   accent         String
   icon           String   // e.g. "utensils" | "coffee" | "store" | "sparkles"

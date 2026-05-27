@@ -612,6 +612,7 @@ export type InquiryScalarFieldEnum = (typeof InquiryScalarFieldEnum)[keyof typeo
 export const BrandScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  email: 'email',
   type: 'type',
   accent: 'accent',
   icon: 'icon',
