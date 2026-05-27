@@ -55,9 +55,16 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/logo-128.webp',
+  },
+  manifest: '/site.webmanifest',
 };
 
 import { TRPCProvider } from "./components/TRPCProvider";
+import WhatsAppCTA from "./components/WhatsAppCTA";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -107,7 +114,13 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen font-body antialiased bg-[#12352A] text-[#FDFCF0]">
         <div className="grain" aria-hidden="true" />
-        <TRPCProvider>{children}</TRPCProvider>
+        <TRPCProvider>
+          {children}
+          <WhatsAppCTA />
+        </TRPCProvider>
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+        )}
       </body>
     </html>
   );

@@ -5,10 +5,12 @@ import { CASE_STUDIES } from '../lib/case-studies';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://itsmaven.in';
 
-  // Base and static pages
   const staticUrls = [
     '',
     '/marketing',
+    '/hospitality',
+    '/automation',
+    '/pos',
     '/blog',
     '/case-studies',
   ].map((route) => ({

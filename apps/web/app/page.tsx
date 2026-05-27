@@ -46,7 +46,7 @@ export default function Home() {
   });
 
   // Lead capture mutation via tRPC
-  const submitInquiryMutation = trpc.simulateAdImpression.useMutation();
+  const submitInquiryMutation = trpc.submitInquiry.useMutation();
 
   const [form, setForm] = useState({
     name: '',
@@ -72,9 +72,12 @@ export default function Home() {
     }
 
     submitInquiryMutation.mutate({
-      brandId: 'corporate-portal',
-      platform: 'Local Maps',
-      budget: 20999
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      businessName: form.companyName,
+      businessType: 'Other' as const,
+      notes: `[Inquiry Type: ${form.inquiryType}] ${form.notes || ''}`.trim() || undefined,
     }, {
       onSuccess: () => {
         setFormSubmitting(false);
@@ -149,6 +152,12 @@ export default function Home() {
               Hearth OS
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </Link>
+            <Link href="/automation" className="hover:text-maven-gold text-maven-cream transition-colors duration-300 relative py-1 focus:outline-none whitespace-nowrap">
+              Chat Autopilot
+            </Link>
+            <Link href="/pos" className="hover:text-maven-gold text-maven-cream transition-colors duration-300 relative py-1 focus:outline-none whitespace-nowrap">
+              POS Sync
+            </Link>
             <button onClick={() => scrollToSection('services')} className="hover:text-maven-gold transition-colors duration-300 relative py-1 focus:outline-none whitespace-nowrap">
               8 Blocks
             </button>
@@ -216,6 +225,12 @@ export default function Home() {
             <Link href="/hospitality" className="hover:text-maven-gold text-maven-gold font-bold transition-colors flex items-center gap-1.5">
               Hearth Hospitality OS
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            </Link>
+            <Link href="/automation" className="hover:text-maven-gold text-maven-cream transition-colors">
+              Chat Autopilot
+            </Link>
+            <Link href="/pos" className="hover:text-maven-gold text-maven-cream transition-colors">
+              POS Sync
             </Link>
             <button onClick={() => scrollToSection('services')} className="hover:text-maven-gold text-maven-cream transition-colors">8 Service Blocks</button>
             <button onClick={() => scrollToSection('verticals')} className="hover:text-maven-gold text-maven-cream transition-colors">Industry Verticals</button>
@@ -617,15 +632,53 @@ export default function Home() {
       </section>
 
       {/* 10. Corporate Minimal Footer */}
-      <footer className="border-t border-maven-cream/5 py-16 bg-maven-green-dark/80 relative z-20 text-center text-xs text-maven-muted font-mono tracking-wider">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 flex flex-col items-center gap-8">
-          <Logo variant="full" size="md" className="mb-2" />
-          <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-6 border-t border-maven-cream/5 pt-8">
-            <span>&copy; {new Date().getFullYear()} MAVEN & CO. All rights reserved.</span>
-            <div className="flex items-center gap-4">
-              <Link href="/hospitality" className="hover:text-maven-gold transition-colors duration-300">Hearth Hospitality OS</Link>
-              <span className="text-maven-cream/10">|</span>
-              <Link href="/dashboard/login" className="hover:text-maven-gold transition-colors duration-300">Partner Login</Link>
+      <footer className="border-t border-maven-cream/5 py-16 bg-maven-green-dark/80 relative z-20 text-xs text-maven-muted font-mono tracking-wider">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 flex flex-col items-center gap-12">
+          
+          {/* Main Footer Grid */}
+          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-10 text-left border-b border-maven-cream/5 pb-12">
+            
+            {/* Column 1: Core Platform */}
+            <div className="space-y-4">
+              <span className="text-[10px] text-maven-gold font-bold uppercase tracking-widest block">Core Platform</span>
+              <div className="flex flex-col gap-2.5">
+                <Link href="/hospitality" className="hover:text-maven-gold transition-colors duration-300">Hearth Hospitality OS</Link>
+                <Link href="/automation" className="hover:text-maven-gold transition-colors duration-300">WhatsApp Chat Autopilot</Link>
+                <Link href="/pos" className="hover:text-maven-gold transition-colors duration-300">POS Sync Showcase</Link>
+              </div>
+            </div>
+
+            {/* Column 2: Client & Compliance */}
+            <div className="space-y-4">
+              <span className="text-[10px] text-maven-gold font-bold uppercase tracking-widest block">Client & Compliance</span>
+              <div className="flex flex-col gap-2.5">
+                <Link href="/dashboard/login" className="hover:text-maven-gold transition-colors duration-300">Partner Portal Login</Link>
+                <Link href="/privacy" className="hover:text-maven-gold transition-colors duration-300">Privacy Protocols</Link>
+                <Link href="/terms" className="hover:text-maven-gold transition-colors duration-300">Terms of Service</Link>
+              </div>
+            </div>
+
+            {/* Column 3: Direct Transmission */}
+            <div className="space-y-4">
+              <span className="text-[10px] text-maven-gold font-bold uppercase tracking-widest block">Direct Transmission</span>
+              <div className="flex flex-col gap-2.5">
+                <span>Kolkata, West Bengal, India</span>
+                <a href="mailto:hello@itsmaven.in" className="hover:text-maven-gold transition-colors duration-300">Email: hello@itsmaven.in</a>
+                <a href="tel:8910121582" className="hover:text-maven-gold transition-colors duration-300">Phone: +91 89101 21582</a>
+                <a href="https://wa.me/918910121582" target="_blank" rel="noopener noreferrer" className="hover:text-maven-gold transition-colors duration-300 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                  WhatsApp Direct Support
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom Copyright & Crafted By */}
+          <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-6 text-[10px]">
+            <div className="flex items-center gap-3">
+              <Logo variant="monogram" size="sm" />
+              <span>&copy; {new Date().getFullYear()} MAVEN & CO. All rights reserved.</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span>Crafted with</span>
@@ -633,6 +686,7 @@ export default function Home() {
               <span>for custom enterprises</span>
             </div>
           </div>
+
         </div>
       </footer>
 

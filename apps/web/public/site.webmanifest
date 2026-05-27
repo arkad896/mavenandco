@@ -1,0 +1,12 @@
+{
+  "name": "Maven & Co.",
+  "short_name": "Maven",
+  "icons": [
+    { "src": "/logo-64.webp", "sizes": "64x64", "type": "image/webp" },
+    { "src": "/logo-128.webp", "sizes": "128x128", "type": "image/webp" }
+  ],
+  "theme_color": "#12352A",
+  "background_color": "#12352A",
+  "display": "standalone",
+  "start_url": "/"
+}
